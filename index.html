@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@400&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
 
@@ -25,7 +26,35 @@
             <div class="header-icons">
                 <img src="search.svg" alt="Поиск" class="icon">
                 <img src="user.svg" alt="профиль" class="icon">
-                <img src="shopping-cart.svg" alt="корзина" class="icon">
+                <div class="cart-wrapper">
+
+    <img src="shopping-cart.svg" 
+         alt="корзина" 
+         class="icon cart-icon">
+
+    <span class="cart-count">0</span>
+
+
+    <div class="cart-window">
+
+        <h3>Корзина</h3>
+
+        <div class="cart-items">
+            <p>Корзина пустая</p>
+        </div>
+
+
+        <button class="checkout-btn">
+    Перейти к оплате
+</button>
+
+<button class="clear-cart">
+    Очистить
+</button>
+
+    </div>
+
+</div>
             </div>
         </header>
 
@@ -39,6 +68,404 @@
         </div>
 
     </div>
+
+
+<section class="catalog">
+
+<h2 class="catalog-title">Каталог</h2>
+
+<div class="products-grid">
+
+
+<!-- Футболка 1 -->
+<div class="product-card">
+
+<img 
+src="images/never.png"
+alt="Never Give Up" 
+class="product-image"
+data-black="images/never.png"
+data-white="">
+
+
+<h3>Never Give Up</h3>
+
+<p class="product-price">16 €</p>
+
+
+<div class="options">
+
+<label>Цвет</label>
+
+<select class="color-select">
+
+<option value="black">Черный</option>
+
+<option value="white">Белый</option>
+
+</select>
+
+
+
+<label>Размер</label>
+
+<select>
+
+<option>S</option>
+<option>M</option>
+
+</select>
+
+
+</div>
+
+
+<div class="product-buttons">
+
+<button class="cart-btn">
+Добавить в корзину
+</button>
+
+<button class="buy-btn">
+Купить сейчас
+</button>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- Футболка 2 -->
+<div class="product-card">
+
+
+<img 
+src="images/chaos.png" 
+alt="Chaos" 
+class="product-image"
+data-black=""
+data-white="images/chaos.png">
+
+
+
+<h3>Chaos</h3>
+
+<p class="product-price">16 €</p>
+
+
+<div class="options">
+
+
+<label>Цвет</label>
+
+
+<select class="color-select">
+
+
+<option value="black">
+Черный
+</option>
+
+
+<option value="white">
+Белый
+</option>
+
+
+</select>
+
+
+
+
+<label>Размер</label>
+
+
+<select>
+
+<option>S</option>
+<option>M</option>
+
+</select>
+
+
+</div>
+
+
+
+<div class="product-buttons">
+
+<button class="cart-btn">
+Добавить в корзину
+</button>
+
+
+<button class="buy-btn">
+Купить сейчас
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- Футболка 3 -->
+<div class="product-card">
+
+
+<img 
+src="images/summer-black.png" 
+alt="Summer Vibes" 
+class="product-image"
+data-black="images/summer-black.png"
+data-white="images/summer.png">
+
+
+
+<h3>Summer Vibes</h3>
+
+<p class="product-price">16 €</p>
+
+
+<div class="options">
+
+
+<label>Цвет</label>
+
+
+<select class="color-select">
+
+
+<option value="black">
+Черный
+</option>
+
+
+<option value="white">
+Белый
+</option>
+
+
+</select>
+
+
+
+
+<label>Размер</label>
+
+
+<select>
+
+<option>S</option>
+<option>M</option>
+
+</select>
+
+
+</div>
+
+
+
+
+<div class="product-buttons">
+
+
+<button class="cart-btn">
+Добавить в корзину
+</button>
+
+
+<button class="buy-btn">
+Купить сейчас
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- Футболка 4 -->
+<div class="product-card">
+
+
+<img 
+src="images/drive.png" 
+alt="Tokyo Drive" 
+class="product-image"
+data-black="images/drive.png"
+data-white="images/drive-white.png">
+
+
+
+<h3>Tokyo Drive</h3>
+
+
+<p class="product-price">16 €</p>
+
+
+<div class="options">
+
+
+<label>Цвет</label>
+
+
+<select class="color-select">
+
+
+<option value="black">
+Черный
+</option>
+
+
+<option value="white">
+Белый
+</option>
+
+
+</select>
+
+
+
+
+<label>Размер</label>
+
+
+<select>
+
+<option>S</option>
+<option>M</option>
+
+</select>
+
+
+</div>
+
+
+
+
+<div class="product-buttons">
+
+
+<button class="cart-btn">
+Добавить в корзину
+</button>
+
+
+<button class="buy-btn">
+Купить сейчас
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<!-- Футболка 5 -->
+<div class="product-card">
+
+
+<img 
+src="images/Samurai.png" 
+alt="Shadow Ronin" 
+class="product-image"
+data-black="images/Samurai.png"
+data-white="">
+
+
+
+<h3>Shadow Ronin</h3>
+
+
+<p class="product-price">16 €</p>
+
+
+<div class="options">
+
+
+<label>Цвет</label>
+
+
+<select class="color-select">
+
+
+<option value="black">
+Черный
+</option>
+
+
+<option value="white">
+Белый
+</option>
+
+
+</select>
+
+
+
+
+<label>Размер</label>
+
+
+<select>
+
+<option>S</option>
+<option>M</option>
+
+</select>
+
+
+</div>
+
+
+
+
+<div class="product-buttons">
+
+
+<button class="cart-btn">
+Добавить в корзину
+</button>
+
+
+<button class="buy-btn">
+Купить сейчас
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+</section>
 
 </body>
 </html>
