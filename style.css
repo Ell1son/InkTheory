@@ -1,74 +1,71 @@
-body {
+* {
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: Arial, sans-serif;
+}
+
+body {
   background: #f5f5f5;
-  color: #222;
 }
 
-/* HEADER */
-.header {
-  text-align: center;
-  padding: 40px 20px;
-  background: #111;
-  color: white;
-}
-
-/* CONTAINER */
-.container {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-  padding: 40px;
-}
-
-/* CARD */
-.card {
+/* NAVBAR */
+.navbar {
+  width: 90%;
+  margin: 20px auto;
   background: white;
-  width: 250px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  text-align: center;
-  padding-bottom: 20px;
+  padding: 15px 25px;
+  border-radius: 20px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.card img {
-  width: 100%;
-  height: auto;
-}
-
-.card h2 {
-  margin: 10px 0;
-}
-
-.price {
-  font-size: 18px;
+.logo {
+  font-size: 20px;
   font-weight: bold;
+}
+
+.menu a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: black;
+}
+
+.icons {
+  font-size: 18px;
+}
+
+/* HERO */
+.hero {
+  width: 90%;
+  margin: 60px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-text h1 {
+  font-size: 64px;
+}
+
+.hero-text p {
+  font-size: 18px;
+  margin: 10px 0 30px;
   color: #444;
 }
 
-/* BUTTON */
 .btn {
-  display: inline-block;
-  margin-top: 10px;
-  padding: 10px 20px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
   background: black;
   color: white;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: 0.2s;
+  cursor: pointer;
 }
 
-.btn:hover {
-  background: #333;
-}
-
-/* FOOTER */
-.footer {
-  text-align: center;
-  padding: 20px;
-  background: #111;
-  color: white;
-  margin-top: 40px;
+.hero-image img {
+  width: 400px;
+  border-radius: 20px;
 }
