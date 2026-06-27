@@ -6,8 +6,8 @@
     <title>InkTheory — Главная</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&family=Jura:wght@400&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:ital,wght@0,100..700;1,100..700&family=Jura:wght@300..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:wght=400&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
@@ -19,13 +19,21 @@
         <header class="main-header">
             <div class="logo">InkTheory</div>
             <nav class="nav-links">
-                <a href="#">Каталог</a>
-                <a href="#">Коллекции</a>
-                <a href="#">Контакты</a>
+                <a href="#catalog" id="lang-nav-catalog">Каталог</a>
+                <a href="#footer" id="lang-nav-collections">О нас</a>
+                <a href="#footer" id="lang-nav-contacts">Контакты</a>
+                
+                <select id="language-select" style="font-family: 'Jura', sans-serif; font-size: 20px; border: 1px solid #1e1e1e; border-radius: 8px; padding: 2px 5px; background: #fff; cursor: pointer; margin-left: 5px;">
+                    <option value="ru">RUS</option>
+                    <option value="en">ENG</option>
+                    <option value="et">EST</option>
+                </select>
             </nav>
             <div class="header-icons">
+                <input type="text" id="search-input" placeholder="Поиск..." style="font-family: 'Jura', sans-serif; font-size: 16px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 10px; width: 130px; outline: none;">
+                
                 <img src="search.svg" alt="Поиск" class="icon">
-                <img src="user.svg" alt="профиль" class="icon">
+                <img src="user.svg" alt="профиль" class="icon" id="user-icon" alt="User">
                 <div class="cart-wrapper">
 
     <img src="shopping-cart.svg" 
@@ -37,21 +45,21 @@
 
     <div class="cart-window">
 
-        <h3>Корзина</h3>
+        <h3 id="lang-cart-title">Корзина</h3>
 
         <div class="cart-items">
-            <p>Корзина пустая</p>
+            <p id="lang-cart-empty">Корзина пустая</p>
         </div>
 
         <div class="cart-total">
     Итого: 0 €
 </div>
 
-        <button class="checkout-btn">
+        <button class="checkout-btn" id="lang-cart-checkout">
     Перейти к оплате
 </button>
 
-<button class="clear-cart">
+<button class="clear-cart" id="lang-cart-clear">
     Очистить
 </button>
 
@@ -63,9 +71,9 @@
 
         <div class="hero-content">
             <h1 class="main-title">InkTheory</h1>
-            <p class="main-subtitle">Чернила, которые говорят<br>за тебя.</p>
-            <a href="#" class="cta-button">
-                Перейти в каталог 
+            <p class="main-subtitle" id="lang-hero-subtitle">Чернила, которые говорят<br>за тебя.</p>
+            <a href="#catalog" class="cta-button">
+                <span id="lang-hero-btn">Перейти в каталог</span> 
                 <span class="arrow">&rarr;</span>
             </a>
         </div>
@@ -73,15 +81,14 @@
     </div>
 
 
-<section class="catalog">
+<section class="catalog" id="catalog">
 
-<h2 class="catalog-title">Каталог</h2>
+<h2 class="catalog-title" id="lang-catalog-title">Каталог</h2>
 
 <div class="products-grid">
 
 
-<!-- Футболка 1 -->
-<div class="product-card">
+<div class="product-card" data-product-id="never">
 
 <img 
 src="images/never.png"
@@ -91,26 +98,26 @@ data-black="images/never.png"
 data-white="">
 
 
-<h3>Never Give Up</h3>
+<h3 class="lang-p-title">Never Give Up</h3>
 
-<p class="product-price">16 €</p>
+<p class="product-price">15 €</p>
 
 
 <div class="options">
 
-<label>Цвет</label>
+<label class="lang-label-color">Цвет</label>
 
 <select class="color-select">
 
-<option value="black">Черный</option>
+<option value="black" class="lang-color-black">Черный</option>
 
-<option value="white">Белый</option>
+<option value="white" class="lang-color-white">Белый</option>
 
 </select>
 
 
 
-<label>Размер</label>
+<label class="lang-label-size">Размер</label>
 
 <select>
 
@@ -125,25 +132,24 @@ data-white="">
 
 <div class="product-buttons">
 
-<button class="cart-btn">
-Добавить в корзину
-</button>
-
-<button class="buy-btn">
+<button 
+class="buy-btn lang-btn-buy"
+data-paypal-black="https://www.paypal.com/ncp/payment/XV2V2QYXVZ77S"
+data-paypal-white="">
 Купить сейчас
 </button>
 
-</div>
-
 
 </div>
 
 
+</div>
 
 
 
-<!-- Футболка 2 -->
-<div class="product-card">
+
+
+<div class="product-card" data-product-id="chaos">
 
 
 <img 
@@ -155,26 +161,26 @@ data-white="images/chaos.png">
 
 
 
-<h3>Chaos</h3>
+<h3 class="lang-p-title">Chaos</h3>
 
-<p class="product-price">16 €</p>
+<p class="product-price">15 €</p>
 
 
 <div class="options">
 
 
-<label>Цвет</label>
+<label class="lang-label-color">Цвет</label>
 
 
 <select class="color-select">
 
 
-<option value="white">
+<option value="white" class="lang-color-white">
 Белый
 </option>
 
 
-<option value="black">
+<option value="black" class="lang-color-black">
 Черный
 </option>
 
@@ -184,7 +190,7 @@ data-white="images/chaos.png">
 
 
 
-<label>Размер</label>
+<label class="lang-label-size">Размер</label>
 
 
 <select>
@@ -201,29 +207,28 @@ data-white="images/chaos.png">
 
 <div class="product-buttons">
 
-<button class="cart-btn">
-Добавить в корзину
-</button>
 
-
-<button class="buy-btn">
+<button 
+class="buy-btn lang-btn-buy"
+data-paypal-black=""
+data-paypal-white="https://www.paypal.com/ncp/payment/ZCN264HT28LJ2">
 Купить сейчас
 </button>
 
 
-</div>
-
 
 </div>
 
 
+</div>
 
 
 
 
 
-<!-- Футболка 3 -->
-<div class="product-card">
+
+
+<div class="product-card" data-product-id="summer">
 
 
 <img 
@@ -235,26 +240,26 @@ data-white="images/summer.png">
 
 
 
-<h3>Summer Vibes</h3>
+<h3 class="lang-p-title">Summer Vibes</h3>
 
-<p class="product-price">16 €</p>
+<p class="product-price">15 €</p>
 
 
 <div class="options">
 
 
-<label>Цвет</label>
+<label class="lang-label-color">Цвет</label>
 
 
 <select class="color-select">
 
 
-<option value="black">
+<option value="black" class="lang-color-black">
 Черный
 </option>
 
 
-<option value="white">
+<option value="white" class="lang-color-white">
 Белый
 </option>
 
@@ -264,7 +269,7 @@ data-white="images/summer.png">
 
 
 
-<label>Размер</label>
+<label class="lang-label-size">Размер</label>
 
 
 <select>
@@ -283,12 +288,12 @@ data-white="images/summer.png">
 <div class="product-buttons">
 
 
-<button class="cart-btn">
-Добавить в корзину
-</button>
 
 
-<button class="buy-btn">
+<button 
+class="buy-btn lang-btn-buy"
+data-paypal-black="https://www.paypal.com/ncp/payment/XZGKQQ6D56FA4"
+data-paypal-white="https://www.paypal.com/ncp/payment/6EME7F92SFN36">
 Купить сейчас
 </button>
 
@@ -304,8 +309,7 @@ data-white="images/summer.png">
 
 
 
-<!-- Футболка 4 -->
-<div class="product-card">
+<div class="product-card" data-product-id="drive">
 
 
 <img 
@@ -317,27 +321,27 @@ data-white="images/drive-white.png">
 
 
 
-<h3>Tokyo Drive</h3>
+<h3 class="lang-p-title">Tokyo Drive</h3>
 
 
-<p class="product-price">16 €</p>
+<p class="product-price">15 €</p>
 
 
 <div class="options">
 
 
-<label>Цвет</label>
+<label class="lang-label-color">Цвет</label>
 
 
 <select class="color-select">
 
 
-<option value="black">
+<option value="black" class="lang-color-black">
 Черный
 </option>
 
 
-<option value="white">
+<option value="white" class="lang-color-white">
 Белый
 </option>
 
@@ -347,7 +351,7 @@ data-white="images/drive-white.png">
 
 
 
-<label>Размер</label>
+<label class="lang-label-size">Размер</label>
 
 
 <select>
@@ -366,29 +370,27 @@ data-white="images/drive-white.png">
 <div class="product-buttons">
 
 
-<button class="cart-btn">
-Добавить в корзину
-</button>
-
-
-<button class="buy-btn">
+<button 
+class="buy-btn lang-btn-buy"
+data-paypal-black="https://www.paypal.com/ncp/payment/RWWBJEUDSFWSC"
+data-paypal-white="https://www.paypal.com/ncp/payment/3JQT25NPFJ8TN">
 Купить сейчас
 </button>
 
 
-</div>
-
 
 </div>
 
 
+</div>
 
 
 
 
 
-<!-- Футболка 5 -->
-<div class="product-card">
+
+
+<div class="product-card" data-product-id="samurai">
 
 
 <img 
@@ -400,27 +402,27 @@ data-white="">
 
 
 
-<h3>Shadow Ronin</h3>
+<h3 class="lang-p-title">Shadow Ronin</h3>
 
 
-<p class="product-price">16 €</p>
+<p class="product-price">15 €</p>
 
 
 <div class="options">
 
 
-<label>Цвет</label>
+<label class="lang-label-color">Цвет</label>
 
 
 <select class="color-select">
 
 
-<option value="black">
+<option value="black" class="lang-color-black">
 Черный
 </option>
 
 
-<option value="white">
+<option value="white" class="lang-color-white">
 Белый
 </option>
 
@@ -430,7 +432,7 @@ data-white="">
 
 
 
-<label>Размер</label>
+<label class="lang-label-size">Размер</label>
 
 
 <select>
@@ -448,13 +450,10 @@ data-white="">
 
 <div class="product-buttons">
 
-
-<button class="cart-btn">
-Добавить в корзину
-</button>
-
-
-<button class="buy-btn">
+<button 
+class="buy-btn lang-btn-buy"
+data-paypal-black="https://www.paypal.com/ncp/payment/8GVHV6QC6L6UG"
+data-paypal-white="">
 Купить сейчас
 </button>
 
@@ -471,7 +470,7 @@ data-white="">
 </section>
 
 
-<footer class="footer">
+<footer class="footer" id="footer">
 
     <div class="footer-content">
 
@@ -479,7 +478,7 @@ data-white="">
 
             <h3>InkTheory</h3>
 
-            <p>
+            <p id="lang-footer-about">
                 Мы создаём одежду с уникальными принтами,
                 вдохновлёнными искусством, культурой и
                 современным дизайном.
@@ -490,13 +489,13 @@ data-white="">
 
         <div class="footer-contacts">
 
-            <h3>Контакты и Социальные сети</h3>
+            <h3 id="lang-footer-contacts-title">Контакты и Социальные сети</h3>
 
             <p>Telegram: @inkThe0ry</p>
 
             <div class="social-icons">
 
-                <p>Социальные сети</p>
+                <p id="lang-footer-socials">Социальные сети</p>
 
                 <a href="https://www.facebook.com/profile.php?id=61590591730196&locale=ru_RU" target="_blank">
                     <img src="images/facebook.png" alt="Facebook">
@@ -522,5 +521,31 @@ data-white="">
     </div>
 
 </footer>
+
+<div id="auth-window" class="auth-window">
+    <div id="login-block">
+        <h3>Войти в аккаунт</h3>
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Пароль" required>
+        <button id="btn-do-login" class="auth-btn-main">Войти</button>
+        <p class="auth-switch">Нет аккаунта? <span id="go-to-reg">Зарегистрироваться</span></p>
+    </div>
+
+    <div id="reg-block" style="display: none;">
+        <h3>Регистрация</h3>
+        <input type="email" id="reg-email" placeholder="Email" required>
+        <input type="password" id="reg-password" placeholder="Пароль (мин. 6 символов)" required>
+        <button id="btn-do-reg" class="auth-btn-main">Создать аккаунт</button>
+        <p class="auth-switch">Уже есть аккаунт? <span id="go-to-login">Войти</span></p>
+    </div>
+
+    <div id="user-block" style="display: none;">
+        <h3>Личный кабинет</h3>
+        <p id="user-email-display" style="font-size: 14px; margin-bottom: 15px; color: #555;"></p>
+        <button id="btn-logout" class="auth-btn-logout">Выйти из аккаунта</button>
+    </div>
+</div>
+
+<script type="module" src="auth.js"></script>
 </body>
 </html>
