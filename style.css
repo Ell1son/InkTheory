@@ -5,6 +5,14 @@
     box-sizing: border-box;
 }
 
+html{
+    scroll-behavior: smooth;
+}
+/* Принудительно задаем твой шрифт Jura для всего сайта, кнопок и ссылок */
+body, a, button, select, input {
+    font-family: 'Jura', sans-serif;
+}
+
 body {
     background-color: #ffffff; 
     min-height: 100vh;
@@ -15,9 +23,14 @@ body {
     font-weight: 400; /* Regular */
 }
 
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
 /* Контейнер экрана */
 .screen-container {
-    width: 100vw;       
+    width: 100%;       
     height: 100vh;      
     position: relative;
     background-image: url('images/main.png');
@@ -57,6 +70,7 @@ body {
 .nav-links {
     display: flex;
     gap: 32px;
+    font-family: "Jura", serif;
 }
 
 .nav-links a {
@@ -74,6 +88,7 @@ body {
     display: flex;
     gap: 24px;
     align-items: center;
+    position: relative;
 }
 
 .header-icons .icon {
@@ -335,8 +350,8 @@ body {
 
     position: absolute;
 
-    right: 0;
-    top: 45px;
+    right: 0px;
+    top: 55px;
 
 
     width: 280px;
@@ -661,4 +676,289 @@ body {
 
     opacity: 0.7;
 
+}
+
+/* ==========================
+   НОВЫЕ СТИЛИ ДЛЯ ПОИСКА И ЯЗЫКОВ
+========================== */
+
+/* Кнопка выбора языков в панели навигации */
+.lang-select {
+    font-family: 'Jura', sans-serif;
+    font-size: 20px;
+    border: 1px solid #1e1e1e;
+    border-radius: 8px;
+    padding: 2px 6px;
+    background: #ffffff;
+    color: #1e1e1e;
+    cursor: pointer;
+    outline: none;
+    transition: 0.2s;
+}
+
+.lang-select:hover {
+    background: #f5f5f5;
+}
+
+/* Контейнер поиска около лупы */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+/* Небольшое текстовое поле поиска */
+#search-input {
+    font-family: 'Jura', sans-serif;
+    font-size: 16px;
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    width: 140px; /* Небольшой фиксированный размер */
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+#search-input:focus {
+    border-color: #111;
+    width: 180px; /* Слегка увеличивается при фокусе */
+}
+
+/* =========================================================================
+   АДАПТИВНОСТЬ (МОБИЛЬНАЯ ВЕРСИЯ И ПЛАНШЕТЫ)
+   ========================================================================= */
+
+/* 1. Настройки для планшетов и экранов среднего размера (до 1024px) */
+@media (max-width: 1024px) {
+    .screen-container {
+        height: auto; /* Разрешаем первому экрану растягиваться по высоте */
+        min-height: 100vh;
+        padding: 2vh 3vw;
+        gap: 40px;
+    }
+
+    .main-title {
+        font-size: 70px; /* Уменьшаем огромный заголовок */
+    }
+
+    .footer-content {
+        gap: 40px;
+    }
+}
+
+/* 2. Настройки для мобильных телефонов (до 768px) */
+@media (max-width: 768px) {
+    /* Шапка сайта */
+    .main-header {
+        height: auto;
+        padding: 15px 20px;
+        flex-direction: column; /* Элементы шапки встают друг под друга */
+        gap: 15px;
+        border-radius: 16px;
+    }
+
+    /* Меню навигации становится компактным */
+    .nav-links {
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .nav-links a {
+        font-size: 18px; /* Чуть уменьшаем размер шрифта меню */
+    }
+
+    /* Иконки, поиск и выбор языка */
+    .header-icons {
+        width: 100%;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    #search-input {
+        width: 120px;
+    }
+    #search-input:focus {
+        width: 140px;
+    }
+
+    /* Корзина (окно на мобильных смещается по центру) */
+    .cart-window {
+        right: auto;
+        transform: translateX(-82%);
+        width: 280px;
+    }
+
+    /* Главный баннер (Hero контент) */
+    .hero-content {
+        padding-left: 0;
+        text-align: center; /* Центрируем текст на мобильном */
+        margin: 40px 0;
+    }
+
+    .main-title {
+        font-size: 54px;
+    }
+
+    .main-subtitle {
+        font-size: 18px;
+    }
+
+    .cta-button {
+        font-size: 18px;
+        padding: 14px 28px;
+    }
+
+    /* Каталог товаров */
+    .catalog {
+        padding: 40px 4vw;
+    }
+
+    .catalog-title {
+        font-size: 38px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    /* Сетка товаров автоматически перестраивается по 1 или 2 в ряд */
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    /* Подвал сайта (Footer) */
+    .footer {
+        padding: 40px 5%;
+        text-align: center;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .footer-about, .footer-contacts {
+        max-width: 100%;
+    }
+
+    .social-icons {
+        justify-content: center;
+    }
+}
+
+/* 3. Оптимизация для совсем маленьких экранов смартфона (до 480px) */
+@media (max-width: 480px) {
+    .main-title {
+        font-size: 42px;
+    }
+    
+    .products-grid {
+        grid-template-columns: 1fr; /* На очень узких экранах товары строго по одному в ряд */
+    }
+}
+
+/* =========================================================================
+   СТИЛИ ДЛЯ ОКНА АККАУНТА (FIREBASE AUTHORIZATION)
+   ========================================================================= */
+.auth-window {
+    display: none;
+    position: absolute;
+    right: 50px; /* Выравнивание, чтобы не резалось у края экрана */
+    top: 65px;
+    width: 280px;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    z-index: 999;
+    font-family: 'Jura', sans-serif;
+}
+
+.auth-window.active {
+    display: block !important;
+}
+
+.auth-window h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #111;
+    font-weight: 600;
+}
+
+.auth-window input {
+    width: 100%;
+    padding: 11px;
+    margin-bottom: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    font-family: 'Jura', sans-serif;
+}
+
+.auth-window input:focus {
+    border-color: #111;
+}
+
+.auth-btn-main {
+    width: 100%;
+    padding: 12px;
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-family: 'Jura', sans-serif;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.auth-btn-main:hover {
+    background: #333;
+}
+
+.auth-btn-logout {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    color: #ff3b3b;
+    border: 1px solid #ff3b3b;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: 'Jura', sans-serif;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.auth-btn-logout:hover {
+    background: #ff3b3b;
+    color: white;
+}
+
+.auth-switch {
+    font-size: 13px;
+    margin-top: 14px;
+    text-align: center;
+    color: #666;
+}
+
+.auth-switch span {
+    color: #111;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Мобильная адаптивность для окна входа */
+@media (max-width: 768px) {
+    .auth-window {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%); /* Идеально по центру на смартфонах */
+        top: 55px;
+    }
 }
