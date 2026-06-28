@@ -962,3 +962,14 @@ html, body {
         top: 55px;
     }
 }
+
+.buy-btn,
+.add-cart-btn {
+    padding: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+}
