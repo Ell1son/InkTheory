@@ -8,7 +8,7 @@ const cartItems = document.querySelector(".cart-items");
 const clearBtn = document.querySelector(".clear-cart");
 const checkoutBtn = document.querySelector(".checkout-btn");
 
-// Вспомогательная функция для безопасного вывода текста в HTML (нужна для buyNow)
+// Вспомогательная функция для безопасного вывода текста в HTML
 function escapeHTML(str) {
     if (!str) return '';
     return str.replace(/[&<>'"]/g, 
@@ -16,20 +16,25 @@ function escapeHTML(str) {
     );
 }
 
+// Стоимость доставки
+const shippingRates = {
+    "omniva": 2.99,
+    "dpd": 2.99,
+    "europe": 2.99
+};
+
 // =========================================================================
 // ДАННЫЕ О ТОВАРАХ И ИХ ТЕКУЩЕМ ВЫБОРЕ ДЛЯ МОДАЛКИ PAYPAL
 // =========================================================================
 
-// База данных товаров (цены, названия и пути к картинкам для каждого цвета)
-const products = [
-    { id: 'never', name: 'Never Give Up', price: 15.00, colors: { black: 'images/never.png', white: 'images/never.png' } },
-    { id: 'chaos', name: 'Chaos', price: 15.00, colors: { black: 'images/chaos.png', white: 'images/chaos.png' } },
-    { id: 'summer', name: 'Summer Vibes', price: 15.00, colors: { black: 'images/summer-black.png', white: 'images/summer.png' } },
-    { id: 'drive', name: 'Tokyo Drive', price: 15.00, colors: { black: 'images/drive.png', white: 'images/drive-white.png' } },
-    { id: 'samurai', name: 'Shadow Ronin', price: 15.00, colors: { black: 'images/Samurai.png', white: 'images/Samurai.png' } }
+    const products = [
+    { id: 'never', name: 'Never Give Up', price: 15.00, colors: { black: 'images/never.png', white: 'images/Never Give Up.png' } },
+    { id: 'chaos', name: 'Chaos', price: 15.00, colors: { black: 'images/Chaos (2).png', white: 'images/Chaos (2).png' } },
+    { id: 'summer', name: 'Summer Vibes', price: 15.00, colors: { black: 'images/Summer Vibes Black.png', white: 'images/Summer Vibes White.png' } },
+    { id: 'drive', name: 'Tokyo Drive', price: 15.00, colors: { black: 'images/Tokyo Drive Black.png', white: 'images/Tokyo Drive White.png' } },
+    { id: 'samurai', name: 'Shadow Ronin', price: 15.00, colors: { black: 'images/Shadow ronin Black.png', white: 'images/Shadow ronin Black.png' } }
 ];
 
-// Глобальный объект, где хранится текущий выбор (цвет и размер) для каждого товара
 const catalogSelection = {
     never: { color: 'black', size: 'S' },
     chaos: { color: 'white', size: 'S' },
@@ -38,14 +43,13 @@ const catalogSelection = {
     samurai: { color: 'black', size: 'S' }
 };
 
-// Функция отслеживания того, что выбирает пользователь в каталоге
 function updateCatalogSelection() {
     document.querySelectorAll('.product-card').forEach(card => {
         const prodId = card.getAttribute('data-product-id');
         if (!prodId || !catalogSelection[prodId]) return;
 
         const colorSelect = card.querySelector('.color-select');
-        const sizeSelect = card.querySelectorAll('.options select')[1]; // второй select — это размер
+        const sizeSelect = card.querySelectorAll('.options select')[1];
 
         if (colorSelect) {
             catalogSelection[prodId].color = colorSelect.value;
@@ -61,12 +65,13 @@ function updateCatalogSelection() {
         }
     });
 }
-// Запускаем отслеживание селектов сразу при загрузке
 updateCatalogSelection();
 
-
 // =========================================================================
-// ФУНКЦИЯ БЫСТРОЙ ОПЛАТЫ ЧЕРЕЗ МОДАЛЬНОЕ ОКНО PAYPAL
+// ФУНКЦИЯ БЫСТРОЙ ОПЛАТЫ + СБОР ДАННЫХ ДОСТАВКИ
+// =========================================================================
+// =========================================================================
+// ФУНКЦИЯ БЫСТРОЙ ОПЛАТЫ + СБОР ДАННЫХ ДОСТАВКИ И РАСЧЕТ СУММЫ
 // =========================================================================
 function buyNow(prodId) {
     const product = products.find(p => p.id === prodId);
@@ -75,7 +80,6 @@ function buyNow(prodId) {
     const selection = catalogSelection[prodId];
     const currentImgPath = product.colors[selection.color] || product.colors['black'];
 
-    // 1. Находим или создаем фоновую подложку модалки
     let payModal = document.getElementById('paypal-fast-modal');
     if (!payModal) {
         payModal = document.createElement('div');
@@ -94,77 +98,170 @@ function buyNow(prodId) {
         document.body.appendChild(payModal);
     }
 
-    // Получаем текущие переводы для модалки из словаря (если они там есть) или пишем дефолтные
     const d = dictionary[activeLang] || dictionary['ru'];
     const colorText = selection.color === 'black' ? (d.clrBlack || 'Черный') : (d.clrWhite || 'Белый');
-    const sizeLabel = d.lblSize || 'Размер';
-    const colorLabel = d.lblColor || 'Цвет';
+    const orderId = 'INK-' + Math.floor(Math.random() * 100000);
+
+    // Локализация текстов
+    const txtName = activeLang === 'et' ? 'Sinu nimi' : (activeLang === 'en' ? 'Full Name' : 'Ваше Имя и Фамилия');
+    const txtPhone = activeLang === 'et' ? 'Telefoninumber (SMS jaoks)' : (activeLang === 'en' ? 'Phone (for SMS)' : 'Телефон (для SMS)');
+    const txtMethod = activeLang === 'et' ? 'Tarneviis' : (activeLang === 'en' ? 'Shipping Method' : 'Способ доставки');
+    const txtAddress = activeLang === 'et' ? 'Pakiautomaadi või pakiautomaadi aadress' : (activeLang === 'en' ? 'Parcel locker or home address' : 'Адрес автомата (или домашний адрес)');
+    const txtBtnSave = activeLang === 'et' ? 'Kinnita andmed' : (activeLang === 'en' ? 'Confirm Details' : 'Подтвердить данные');
+    const txtTotal = activeLang === 'et' ? 'Kokku tasumisele' : (activeLang === 'en' ? 'Total to pay' : 'Итого к оплате');
+
+    // Начальная сумма (цена товара + дефолтная доставка Omniva 3.50)
+    let initialShipping = shippingRates["omniva"];
+    let initialTotal = product.price + initialShipping;
 
     payModal.innerHTML = `
-        <div style="background: #111; padding: 30px; border-radius: 12px; border: 1px solid #222; width: 95%; max-width: 650px; position: relative; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.7); font-family: sans-serif; color: #fff;
-            max-height: 90vh; 
-            display: flex; flex-direction: column; box-sizing: border-box;">
+        <div style="background: #111; padding: 25px; border-radius: 12px; border: 1px solid #222; width: 95%; max-width: 500px; position: relative; text-align: center; color: #fff; max-height: 95vh; display: flex; flex-direction: column; box-sizing: border-box; overflow-y: auto;">
            
             <button id="closeFastModal" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: #888; font-size: 28px; cursor: pointer; line-height: 1; z-index: 10;">&times;</button>
            
             <div style="flex-shrink: 0;">
-                <div style="width: 130px; height: 130px; margin: 0 auto 15px auto; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <div style="width: 90px; height: 90px; margin: 0 auto 10px auto; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
                     <img src="${currentImgPath}" alt="${escapeHTML(product.name)}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                 </div>
-                <h3 style="margin: 0 0 6px 0; font-size: 20px; font-weight: 600;">${escapeHTML(productNames[prodId] ? productNames[prodId][activeLang] : product.name)}</h3>
-                <p style="margin: 0 0 12px 0; color: #888; font-size: 14px;">${sizeLabel}: ${selection.size} | ${colorLabel}: ${colorText}</p>
-                <p style="margin: 0 0 25px 0; font-size: 22px; font-weight: bold; color: #fff;">${product.price.toFixed(2)} €</p>
+                <h3 style="margin: 0 0 4px 0; font-size: 18px;">${escapeHTML(productNames[prodId] ? productNames[prodId][activeLang] : product.name)}</h3>
+                <p style="margin: 0 0 15px 0; color: #888; font-size: 13px;">${d.lblSize}: ${selection.size} | ${d.lblColor}: ${colorText}</p>
             </div>
            
-            <div id="paypal-fast-container" style="flex: 1; overflow-y: auto; padding-right: 2px; width: 100%; box-sizing: border-box;"></div>
+            <!-- Форма сбора адреса доставки -->
+            <form id="fastOrderForm" action="https://formsubmit.co/lyvero.company@gmail.com" method="POST" style="text-align: left; display: flex; flex-direction: column; gap: 10px;">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="order_id" value="${orderId}">
+                <input type="hidden" name="product" value="${product.name} (${selection.size}/${selection.color})">
+                <input type="hidden" name="total_price" id="hiddenTotalInput" value="${initialTotal.toFixed(2)} €">
+
+                <label style="font-size: 13px; color: #aaa;">${txtName}:</label>
+                <input type="text" name="customer_name" required style="padding: 8px; background: #222; border: 1px solid #333; color: #fff; border-radius: 6px;">
+
+                <label style="font-size: 13px; color: #aaa;">${txtPhone}:</label>
+                <input type="tel" name="customer_phone" required placeholder="+372..." style="padding: 8px; background: #222; border: 1px solid #333; color: #fff; border-radius: 6px;">
+
+                <label style="font-size: 13px; color: #aaa;">${txtMethod}:</label>
+                <select name="shipping_method" id="fastShippingMethod" required style="padding: 8px; background: #222; border: 1px solid #333; color: #fff; border-radius: 6px;">
+                    <option value="omniva">Omniva Pakiautomaat (€2.99)</option>
+                    <option value="dpd">DPD Pakiautomaat (€2.99)</option>
+                    <option value="europe">Smartposti Pakiautomaat (€2.99)</option>
+                </select>
+
+                <label style="font-size: 13px; color: #aaa;">${txtAddress}:</label>
+                <textarea name="delivery_address" required rows="2" placeholder="Таллинн, Kaubamaja Omniva..." style="padding: 8px; background: #222; border: 1px solid #333; color: #fff; border-radius: 6px; resize: none;"></textarea>
+
+                <!-- Динамический текст итоговой стоимости -->
+                <div style="margin-top: 5px; padding: 10px; background: #1a1a1a; border-radius: 6px; text-align: center; border: 1px dashed #333;">
+                    <span style="font-size: 14px; color: #aaa;">${txtTotal}:</span>
+                    <strong id="modalTotalDisplay" style="font-size: 18px; color: #fff; margin-left: 5px;">${initialTotal.toFixed(2)} €</strong>
+                </div>
+
+                <button type="submit" id="fastSubmitBtn" style="padding: 12px; background: #fff; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px;">${txtBtnSave}</button>
+            </form>
+
+            <!-- Контейнер для PayPal -->
+            <div id="paypal-fast-container" style="display: none; margin-top: 15px; min-height: 150px;">
+                <p style="color: #4cd137; font-weight: bold; margin-bottom: 15px; font-size: 14px;">✓ Данные доставки сохранены. Оплатите заказ:</p>
+                <div id="paypal-buttons-inside"></div>
+            </div>
         </div>
     `;
 
     payModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
+    const shippingSelect = document.getElementById('fastShippingMethod');
+    const totalDisplay = document.getElementById('modalTotalDisplay');
+    const hiddenTotalInput = document.getElementById('hiddenTotalInput');
+
+    // Функция перерасчета стоимости «на лету»
+    function recalculate() {
+        const selectedShipping = shippingSelect.value;
+        const shippingPrice = shippingRates[selectedShipping] || 0;
+        const finalPrice = product.price + shippingPrice;
+        
+        totalDisplay.innerText = `${finalPrice.toFixed(2)} €`;
+        hiddenTotalInput.value = `${finalPrice.toFixed(2)} €`; // Чтобы эта сумма улетала и вам на email
+        return finalPrice;
+    }
+
+    // Слушаем изменения в выпадающем списке доставки
+    shippingSelect.addEventListener('change', recalculate);
+
+    // Закрытие модалки
     document.getElementById('closeFastModal').addEventListener('click', () => {
         payModal.style.display = 'none';
         document.body.style.overflow = '';
     });
 
-    // 3. Рендерим кнопки PayPal SDK
-    if (window.paypal && window.paypal.Buttons) {
-        window.paypal.Buttons({
-            style: {
-                layout: 'vertical',
-                color:  'gold',
-                shape:  'rect',
-                label:  'buynow'
-            },
-            createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        description: `Покупка: ${product.name} (${selection.size}/${selection.color})`,
-                        amount: {
-                            currency_code: "EUR",
-                            value: product.price.toFixed(2)
-                        }
-                    }]
-                });
-            },
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    showMessage(d.msgAdded ? "Оплата успешно прошла! ✔" : "Success! ✔");
-                    payModal.style.display = 'none';
-                    document.body.style.overflow = '';
-                });
-            },
-            onError: function(err) {
-                console.error("PayPal Error: ", err);
-                showMessage("PayPal Error ❌");
+    // Обработка отправки формы
+    document.getElementById('fastOrderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = this;
+        const submitBtn = document.getElementById('fastSubmitBtn');
+        const finalPrice = recalculate(); // Получаем актуальную сумму с доставкой
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Saving...';
+
+        // Отправка данных на почту
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(() => {
+            form.style.display = 'none';
+            document.getElementById('paypal-fast-container').style.display = 'block';
+            
+            // Запуск кнопок PayPal с обновленной ценой товара + доставки
+            if (window.paypal && window.paypal.Buttons) {
+                window.paypal.Buttons({
+                    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'buynow' },
+                    createOrder: function(data, actions) {
+                        return actions.order.create({
+                            purchase_units: [{
+                                invoice_id: orderId,
+                                description: `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color})`,
+                                amount: {
+                                    currency_code: "EUR",
+                                    value: finalPrice.toFixed(2) // Передаем итоговую сумму
+                                }
+                            }]
+                        });
+                    },
+                    onApprove: function(data, actions) {
+                        return actions.order.capture().then(function(details) {
+                            showMessage(activeLang === 'et' ? "Edukalt makstud! ✔" : "Success! ✔");
+                            payModal.style.display = 'none';
+                            document.body.style.overflow = '';
+                        });
+                    },
+                    onError: function(err) {
+                        console.error(err);
+                        showMessage("PayPal Error ❌");
+                    }
+                }).render('#paypal-buttons-inside');
             }
-        }).render('#paypal-fast-container');
-    }
+        })
+        .catch(() => {
+            alert('Error saving data.');
+            submitBtn.disabled = false;
+            submitBtn.innerText = txtBtnSave;
+        });
+    });
 }
+// Переход к оплате из корзины (Оставлено без изменений)
+checkoutBtn.addEventListener("click", () => {
+    if (cart.length === 0) {
+        showMessage(dictionary[activeLang].msgEmpty);
+        return;
+    }
+    window.open("https://www.paypal.com/ncp/payment/6EME7F92SFN36", "_blank");
+});
 
-
-// Добавление товара в корзину (Оставлено без изменений)
+// Добавление товара в корзину
 buttons.forEach(button => {
     button.addEventListener("click", () => {
         const card = button.closest(".product-card");
@@ -242,16 +339,7 @@ clearBtn.addEventListener("click", () => {
     showMessage(dictionary[activeLang].msgCleared);
 });
 
-// Переход к оплате из корзины
-checkoutBtn.addEventListener("click", () => {
-    if (cart.length === 0) {
-        showMessage(dictionary[activeLang].msgEmpty);
-        return;
-    }
-    window.open("https://www.paypal.com/ncp/payment/6EME7F92SFN36", "_blank");
-});
-
-// Уведомления (Заменено внутреннее имя для совместимости)
+// Уведомления
 function showMessage(text) {
     let message = document.querySelector(".cart-message");
     if (!message) {
@@ -419,16 +507,12 @@ if (langSelect) {
     });
 }
 
-// =========================================================================
-// ИЗМЕНЕННЫЙ ОБРАБОТЧИК КЛИКА «КУПИТЬ СЕЙЧАС» — ТЕПЕРЬ ВЫЗЫВАЕТ buyNow()
-// =========================================================================
 document.querySelectorAll(".buy-btn").forEach(button => {
     button.addEventListener("click", () => {
         const card = button.closest(".product-card");
         const prodId = card.getAttribute("data-product-id");
 
         if (prodId) {
-            // Вызываем вашу функцию быстрого заказа PayPal
             buyNow(prodId);
         }
     });
