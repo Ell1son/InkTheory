@@ -3,513 +3,398 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InkTheory — Главная</title>
+    <title>InkTheory — Чернила, которые говорят за тебя</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:ital,wght@0,100..700;1,100..700&family=Jura:wght@300..700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Josefin+Slab:wght=400&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Jura:wght@300..700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AVdKma7E9aNHm6gF-HVuFn_Rjec9d2-NnU4Jur6_lv2ygotfz2mHL4C8Efju1PeZSCrZlKf5Laa6yHff&currency=EUR"></script>
 </head>
 <body>
 
-    <div class="screen-container">
-        
-        <header class="main-header">
-            <div class="logo">InkTheory</div>
+    <div class="grain"></div>
+
+    <header class="main-header" id="siteNav">
+        <div class="nav-inner">
+            <a href="#top" class="logo">Ink<em>Theory</em></a>
+
             <nav class="nav-links">
                 <a href="#catalog" id="lang-nav-catalog">Каталог</a>
                 <a href="#footer" id="lang-nav-collections">О нас</a>
                 <a href="#footer" id="lang-nav-contacts">Контакты</a>
-                
-                <select id="language-select" style="font-family: 'Jura', sans-serif; font-size: 20px; border: 1px solid #1e1e1e; border-radius: 8px; padding: 2px 5px; background: #fff; cursor: pointer; margin-left: 5px;">
+            </nav>
+
+            <div class="header-icons">
+                <div class="search-wrap">
+                    <img src="search.svg" alt="Поиск" class="icon search-icon">
+                    <input type="text" id="search-input" placeholder="Поиск..." autocomplete="off">
+                    <div class="search-results" id="search-results"></div>
+                </div>
+
+                <select id="language-select">
                     <option value="ru">RUS</option>
                     <option value="en">ENG</option>
                     <option value="et">EST</option>
                 </select>
-            </nav>
-            <div class="header-icons">
-                <input type="text" id="search-input" placeholder="Поиск..." style="font-family: 'Jura', sans-serif; font-size: 16px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 10px; width: 130px; outline: none;">
-                
-                <img src="search.svg" alt="Поиск" class="icon">
-                <img src="user.svg" alt="профиль" class="icon" id="user-icon">
+
                 <div class="cart-wrapper">
+                    <img src="shopping-cart.svg" alt="корзина" class="icon cart-icon">
+                    <span class="cart-count">0</span>
 
-    <img src="shopping-cart.svg" 
-         alt="корзина" 
-         class="icon cart-icon">
+                    <div class="cart-window">
+                        <h3 id="lang-cart-title">Корзина</h3>
 
-    <span class="cart-count">0</span>
+                        <div class="cart-items">
+                            <p id="lang-cart-empty">Корзина пустая</p>
+                        </div>
 
+                        <div class="cart-total">Итого: 0 €</div>
 
-    <div class="cart-window">
-
-        <h3 id="lang-cart-title">Корзина</h3>
-
-        <div class="cart-items">
-            <p id="lang-cart-empty">Корзина пустая</p>
-        </div>
-
-        <div class="cart-total">
-    Итого: 0 €
-</div>
-
-        <button class="checkout-btn" id="lang-cart-checkout">
-    Перейти к оплате
-</button>
-
-<button class="clear-cart" id="lang-cart-clear">
-    Очистить
-</button>
-
-    </div>
-
-</div>
+                        <button class="checkout-btn" id="lang-cart-checkout">Перейти к оплате</button>
+                        <button class="clear-cart" id="lang-cart-clear">Очистить</button>
+                    </div>
+                </div>
             </div>
-        </header>
+        </div>
+    </header>
 
+    <section class="hero" id="top">
+        <div class="hero-veil"></div>
         <div class="hero-content">
-            <h1 class="main-title">InkTheory</h1>
+            <p class="eyebrow">Ателье принта — основано в Эстонии</p>
+            <h1 class="main-title">Ink<em>Theory</em></h1>
+
+            <svg class="ink-stroke" viewBox="0 0 460 30" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M4 20 C 90 4, 180 30, 260 14 S 400 6, 456 18" />
+            </svg>
+
             <p class="main-subtitle" id="lang-hero-subtitle">Чернила, которые говорят<br>за тебя.</p>
+
             <a href="#catalog" class="cta-button">
-                <span id="lang-hero-btn">Перейти в каталог</span> 
+                <span id="lang-hero-btn">Перейти в каталог</span>
                 <span class="arrow">&rarr;</span>
             </a>
         </div>
 
-    </div>
-
-
-<section class="catalog" id="catalog">
-
-<h2 class="catalog-title" id="lang-catalog-title">Каталог</h2>
-
-<div class="products-grid">
-
-
-<div class="product-card" data-product-id="never">
-
-<img 
-src="images/Never Give Up.png"
-alt="Never Give Up" 
-class="product-image"
-data-black="images/never.png"
-data-white="">
-
-
-<h3 class="lang-p-title">Never Give Up</h3>
-
-<p class="product-price">15 €</p>
-
-
-<div class="options">
-
-<label class="lang-label-color">Цвет</label>
-
-<select class="color-select">
-
-<option value="black" class="lang-color-black">Черный</option>
-
-</select>
-
-
-
-<label class="lang-label-size">Размер</label>
-
-<select>
-
-<option>S</option>
-<option>M</option>
-
-</select>
-
-
-</div>
-
-
-<div class="product-buttons">
-
-<button 
-class="buy-btn lang-btn-buy"
-data-paypal-black="https://www.paypal.com/ncp/payment/XV2V2QYXVZ77S"
-data-paypal-white="">
-Купить сейчас
-</button>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="product-card" data-product-id="chaos">
-
-
-<img 
-src="images/Chaos (2).png" 
-alt="Chaos" 
-class="product-image"
-data-black=""
-data-white="images/Chaos (2).png">
-
-
-
-<h3 class="lang-p-title">Chaos</h3>
-
-<p class="product-price">15 €</p>
-
-
-<div class="options">
-
-
-<label class="lang-label-color">Цвет</label>
-
-
-<select class="color-select">
-
-
-<option value="white" class="lang-color-white">
-Белый
-</option>
-
-
-</select>
-
-
-
-
-<label class="lang-label-size">Размер</label>
-
-
-<select>
-
-<option>S</option>
-<option>M</option>
-
-</select>
-
-
-</div>
-
-
-
-<div class="product-buttons">
-
-
-<button 
-class="buy-btn lang-btn-buy"
-data-paypal-black=""
-data-paypal-white="https://www.paypal.com/ncp/payment/ZCN264HT28LJ2">
-Купить сейчас
-</button>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="product-card" data-product-id="summer">
-
-
-<img 
-src="images/Summer Vibes Black.png" 
-alt="Summer Vibes" 
-class="product-image"
-data-black="images/Summer Vibes Black.png"
-data-white="images/Summer Vibes White.png">
-
-
-
-<h3 class="lang-p-title">Summer Vibes</h3>
-
-<p class="product-price">15 €</p>
-
-
-<div class="options">
-
-
-<label class="lang-label-color">Цвет</label>
-
-
-<select class="color-select">
-
-
-<option value="black" class="lang-color-black">
-Черный
-</option>
-
-
-<option value="white" class="lang-color-white">
-Белый
-</option>
-
-
-</select>
-
-
-
-
-<label class="lang-label-size">Размер</label>
-
-
-<select>
-
-<option>S</option>
-<option>M</option>
-
-</select>
-
-
-</div>
-
-
-
-
-<div class="product-buttons">
-
-
-
-
-<button 
-class="buy-btn lang-btn-buy"
-data-paypal-black="https://www.paypal.com/ncp/payment/XZGKQQ6D56FA4"
-data-paypal-white="https://www.paypal.com/ncp/payment/6EME7F92SFN36">
-Купить сейчас
-</button>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="product-card" data-product-id="drive">
-
-
-<img 
-src="images/Tokyo Drive Black.png" 
-alt="Tokyo Drive" 
-class="product-image"
-data-black="images/Tokyo Drive Black.png"
-data-white="images/Tokyo Drive White.png">
-
-
-
-<h3 class="lang-p-title">Tokyo Drive</h3>
-
-
-<p class="product-price">15 €</p>
-
-
-<div class="options">
-
-
-<label class="lang-label-color">Цвет</label>
-
-
-<select class="color-select">
-
-
-<option value="black" class="lang-color-black">
-Черный
-</option>
-
-
-<option value="white" class="lang-color-white">
-Белый
-</option>
-
-
-</select>
-
-
-
-
-<label class="lang-label-size">Размер</label>
-
-
-<select>
-
-<option>S</option>
-<option>M</option>
-
-</select>
-
-
-</div>
-
-
-
-
-<div class="product-buttons">
-
-
-<button 
-class="buy-btn lang-btn-buy"
-data-paypal-black="https://www.paypal.com/ncp/payment/RWWBJEUDSFWSC"
-data-paypal-white="https://www.paypal.com/ncp/payment/3JQT25NPFJ8TN">
-Купить сейчас
-</button>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="product-card" data-product-id="samurai">
-
-
-<img 
-src="images/Shadow ronin Black.png" 
-alt="Shadow Ronin" 
-class="product-image"
-data-black="images/Shadow ronin Black.png"
-data-white="">
-
-
-
-<h3 class="lang-p-title">Shadow Ronin</h3>
-
-
-<p class="product-price">15 €</p>
-
-
-<div class="options">
-
-
-<label class="lang-label-color">Цвет</label>
-
-
-<select class="color-select">
-
-
-<option value="black" class="lang-color-black">
-Черный
-</option>
-
-
-</select>
-
-
-
-
-<label class="lang-label-size">Размер</label>
-
-
-<select>
-
-<option>S</option>
-<option>M</option>
-
-</select>
-
-
-</div>
-
-
-
-
-<div class="product-buttons">
-
-<button 
-class="buy-btn lang-btn-buy"
-data-paypal-black="https://www.paypal.com/ncp/payment/8GVHV6QC6L6UG"
-data-paypal-white="">
-Купить сейчас
-</button>
-
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-</section>
-
-
-<footer class="footer" id="footer">
-
-    <div class="footer-content">
-
-        <div class="footer-about">
-
-            <h3>InkTheory</h3>
-
-            <p id="lang-footer-about">
-                Мы создаём одежду с уникальными принтами,
-                вдохновлёнными искусством, культурой и
-                современным дизайном.
-            </p>
-
+        <div class="scroll-cue" aria-hidden="true">
+            <span></span>
+            <p id="lang-scroll-cue">Листайте</p>
+        </div>
+    </section>
+
+    <section class="catalog" id="catalog">
+
+        <div class="section-head reveal">
+            <span class="eyebrow">Коллекция</span>
+            <h2 class="catalog-title" id="lang-catalog-title">Каталог</h2>
+            <svg class="ink-divider" viewBox="0 0 300 16" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M2 8 C 60 -2, 120 18, 180 8 S 260 -2, 298 8" />
+            </svg>
         </div>
 
+        <div class="products-grid">
 
-        <div class="footer-contacts">
+            <div class="product-card reveal" data-product-id="never">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/Never Give Up.png"
+                        alt="Never Give Up"
+                        class="product-image"
+                        data-black="images/never.png"
+                        data-white="">
+                </div>
 
-            <h3 id="lang-footer-contacts-title">Контакты и Социальные сети</h3>
+                <div class="product-body">
+                    <h3 class="lang-p-title">Never Give Up</h3>
+                    <p class="product-price">15 €</p>
 
-            <p>Telegram: @inkThe0ry</p>
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="black" class="lang-color-black">Черный</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
 
-            <div class="social-icons">
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy"
+                            data-paypal-black="https://www.paypal.com/ncp/payment/XV2V2QYXVZ77S"
+                            data-paypal-white="">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                <p id="lang-footer-socials">Social Networks</p>
+            <div class="product-card reveal" data-product-id="chaos">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/Chaos (2).png"
+                        alt="Chaos"
+                        class="product-image"
+                        data-black=""
+                        data-white="images/Chaos (2).png">
+                </div>
 
-                <a href="https://www.facebook.com/profile.php?id=61590591730196&locale=ru_RU" target="_blank">
-                    <img src="images/facebook.png" alt="Facebook">
-                </a>
+                <div class="product-body">
+                    <h3 class="lang-p-title">Chaos</h3>
+                    <p class="product-price">15 €</p>
 
-                <a href="https://www.tiktok.com/@inktheory18?is_from_webapp=1&sender_device=pc" target="_blank">
-                    <img src="images/tiktok.png" alt="TikTok">
-                </a>
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="white" class="lang-color-white">Белый</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
 
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy"
+                            data-paypal-black=""
+                            data-paypal-white="https://www.paypal.com/ncp/payment/ZCN264HT28LJ2">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card reveal" data-product-id="summer">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/Summer Vibes Black.png"
+                        alt="Summer Vibes"
+                        class="product-image"
+                        data-black="images/Summer Vibes Black.png"
+                        data-white="images/Summer Vibes White.png">
+                </div>
+
+                <div class="product-body">
+                    <h3 class="lang-p-title">Summer Vibes</h3>
+                    <p class="product-price">15 €</p>
+
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="black" class="lang-color-black">Черный</option>
+                                <option value="white" class="lang-color-white">Белый</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy"
+                            data-paypal-black="https://www.paypal.com/ncp/payment/XZGKQQ6D56FA4"
+                            data-paypal-white="https://www.paypal.com/ncp/payment/6EME7F92SFN36">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card reveal" data-product-id="drive">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/Tokyo Drive Black.png"
+                        alt="Tokyo Drive"
+                        class="product-image"
+                        data-black="images/Tokyo Drive Black.png"
+                        data-white="images/Tokyo Drive White.png">
+                </div>
+
+                <div class="product-body">
+                    <h3 class="lang-p-title">Tokyo Drive</h3>
+                    <p class="product-price">15 €</p>
+
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="black" class="lang-color-black">Черный</option>
+                                <option value="white" class="lang-color-white">Белый</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy"
+                            data-paypal-black="https://www.paypal.com/ncp/payment/RWWBJEUDSFWSC"
+                            data-paypal-white="https://www.paypal.com/ncp/payment/3JQT25NPFJ8TN">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card reveal" data-product-id="samurai">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/Shadow ronin Black.png"
+                        alt="Shadow Ronin"
+                        class="product-image"
+                        data-black="images/Shadow ronin Black.png"
+                        data-white="">
+                </div>
+
+                <div class="product-body">
+                    <h3 class="lang-p-title">Shadow Ronin</h3>
+                    <p class="product-price">15 €</p>
+
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="black" class="lang-color-black">Черный</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy"
+                            data-paypal-black="https://www.paypal.com/ncp/payment/8GVHV6QC6L6UG"
+                            data-paypal-white="">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="footer" id="footer">
+        <div class="footer-content">
+
+            <div class="footer-about reveal">
+                <div class="logo footer-logo">Ink<em>Theory</em></div>
+                <p id="lang-footer-about">
+                    Мы создаём одежду с уникальными принтами,
+                    вдохновлёнными искусством, культурой и
+                    современным дизайном.
+                </p>
+            </div>
+
+            <div class="footer-contacts reveal">
+                <h3 id="lang-footer-contacts-title">Контакты и Социальные сети</h3>
+                <p class="telegram-line">Telegram: @inkThe0ry</p>
+
+                <div class="social-icons">
+                    <p id="lang-footer-socials">Social Networks</p>
+
+                    <a href="https://www.facebook.com/profile.php?id=61590591730196&locale=ru_RU" target="_blank" rel="noopener">
+                        <img src="images/facebook.png" alt="Facebook">
+                    </a>
+
+                    <a href="https://www.tiktok.com/@inktheory18?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener">
+                        <img src="images/tiktok.png" alt="TikTok">
+                    </a>
+
+                    <a href="https://www.instagram.com/inktheory.ee/" target="_blank" rel="noopener">
+                        <img src="images/instagramm.png" alt="Instagram">
+                    </a>
+                </div>
             </div>
 
         </div>
 
-    </div>
-
-
-    <div class="footer-bottom">
-
-        <p>
-            © 2026 InkTheory.
-        </p>
-
-    </div>
-
-</footer>
+        <div class="footer-bottom">
+            <p>© 2026 InkTheory.</p>
+        </div>
+    </footer>
 
 </body>
 </html>
