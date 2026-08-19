@@ -130,7 +130,7 @@ function buyNow(prodId) {
 
     const fitText = d[fitKeyMap[selection.fit]] || 'Regular';
 
-    const orderId = 'INK-' + Math.floor(Math.random() * 100000);
+    const orderId = 'INK-' + Math.floor(Math.random() * 10000);
 
     // Локализация текстов
     const txtName =
