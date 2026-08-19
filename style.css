@@ -746,14 +746,20 @@ a {
 
 .options select {
     flex: 1;
-    padding: 9px 10px;
+    padding: 9px 38px 9px 10px;
     border: 1px solid var(--border);
     border-radius: 8px;
-    background: var(--surface-2);
+    background-color: var(--surface-2);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23f2ede2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px 8px;
     color: var(--text);
     font-size: 14px;
     outline: none;
     cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
     transition: border-color 0.25s;
 }
 

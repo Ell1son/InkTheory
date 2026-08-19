@@ -58,12 +58,14 @@ function updateCatalogSelection() {
                 catalogSelection[prodId].color = e.target.value;
             });
         }
+
         if (sizeSelect) {
             catalogSelection[prodId].size = sizeSelect.value;
             sizeSelect.addEventListener('change', (e) => {
                 catalogSelection[prodId].size = e.target.value;
             });
         }
+
         if (fitSelect) {
             catalogSelection[prodId].fit = fitSelect.value;
             fitSelect.addEventListener('change', (e) => {
@@ -72,11 +74,13 @@ function updateCatalogSelection() {
         }
     });
 }
+
 updateCatalogSelection();
 
 // =========================================================================
 // ФУНКЦИЯ БЫСТРОЙ ОПЛАТЫ + СБОР ДАННЫХ ДОСТАВКИ И РАСЧЕТ СУММЫ
 // =========================================================================
+
 function buyNow(prodId) {
     const product = products.find(p => p.id === prodId);
     if (!product) return;
@@ -85,12 +89,17 @@ function buyNow(prodId) {
     const currentImgPath = product.colors[selection.color] || product.colors['black'];
 
     let payModal = document.getElementById('paypal-fast-modal');
+
     if (!payModal) {
         payModal = document.createElement('div');
         payModal.id = 'paypal-fast-modal';
+
         payModal.style.cssText = `
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(6, 5, 8, 0.88);
             backdrop-filter: blur(4px);
             z-index: 99999;
@@ -100,77 +109,375 @@ function buyNow(prodId) {
             padding: 20px;
             box-sizing: border-box;
         `;
+
         document.body.appendChild(payModal);
     }
 
     const d = dictionary[activeLang] || dictionary['ru'];
-    const colorText = selection.color === 'black' ? (d.clrBlack || 'Черный') : (d.clrWhite || 'Белый');
-    const fitKeyMap = { slim: 'fitSlim', regular: 'fitRegular', relaxed: 'fitRelaxed', loose: 'fitLoose', oversize: 'fitOversize' };
+
+    const colorText =
+        selection.color === 'black'
+            ? (d.clrBlack || 'Черный')
+            : (d.clrWhite || 'Белый');
+
+    const fitKeyMap = {
+        slim: 'fitSlim',
+        regular: 'fitRegular',
+        relaxed: 'fitRelaxed',
+        loose: 'fitLoose',
+        oversize: 'fitOversize'
+    };
+
     const fitText = d[fitKeyMap[selection.fit]] || 'Regular';
+
     const orderId = 'INK-' + Math.floor(Math.random() * 100000);
 
     // Локализация текстов
-    const txtName = activeLang === 'et' ? 'Sinu nimi' : (activeLang === 'en' ? 'Full Name' : 'Ваше Имя и Фамилия');
-    const txtPhone = activeLang === 'et' ? 'Telefoninumber (SMS jaoks)' : (activeLang === 'en' ? 'Phone (for SMS)' : 'Телефон (для SMS)');
-    const txtMethod = activeLang === 'et' ? 'Tarneviis' : (activeLang === 'en' ? 'Shipping Method' : 'Способ доставки');
-    const txtAddress = activeLang === 'et' ? 'Pakiautomaadi või pakiautomaadi aadress' : (activeLang === 'en' ? 'Parcel locker or home address' : 'Адрес автомата (или домашний адрес)');
-    const txtBtnSave = activeLang === 'et' ? 'Kinnita andmed' : (activeLang === 'en' ? 'Confirm Details' : 'Подтвердить данные');
-    const txtTotal = activeLang === 'et' ? 'Kokku tasumisele' : (activeLang === 'en' ? 'Total to pay' : 'Итого к оплате');
+    const txtName =
+        activeLang === 'et'
+            ? 'Sinu nimi'
+            : (activeLang === 'en'
+                ? 'Full Name'
+                : 'Ваше Имя и Фамилия');
 
-    // Начальная сумма (цена товара + дефолтная доставка Omniva)
+    const txtPhone =
+        activeLang === 'et'
+            ? 'Telefoninumber (SMS jaoks)'
+            : (activeLang === 'en'
+                ? 'Phone (for SMS)'
+                : 'Телефон (для SMS)');
+
+    const txtMethod =
+        activeLang === 'et'
+            ? 'Tarneviis'
+            : (activeLang === 'en'
+                ? 'Shipping Method'
+                : 'Способ доставки');
+
+    const txtAddress =
+        activeLang === 'et'
+            ? 'Pakiautomaadi või pakiautomaadi aadress'
+            : (activeLang === 'en'
+                ? 'Parcel locker or home address'
+                : 'Адрес автомата (или домашний адрес)');
+
+    const txtBtnSave =
+        activeLang === 'et'
+            ? 'Kinnita andmed'
+            : (activeLang === 'en'
+                ? 'Confirm Details'
+                : 'Подтвердить данные');
+
+    const txtTotal =
+        activeLang === 'et'
+            ? 'Kokku tasumisele'
+            : (activeLang === 'en'
+                ? 'Total to pay'
+                : 'Итого к оплате');
+
+    // Начальная сумма
     let initialShipping = shippingRates["omniva"];
     let initialTotal = product.price + initialShipping;
 
     payModal.innerHTML = `
-        <div style="background: #15131a; padding: 28px; border-radius: 16px; border: 1px solid rgba(201,162,75,0.28); width: 95%; max-width: 500px; position: relative; text-align: center; color: #f2ede2; max-height: 95vh; display: flex; flex-direction: column; box-sizing: border-box; overflow-y: auto; font-family: 'Jura', sans-serif; box-shadow: 0 30px 80px rgba(0,0,0,0.6);">
+        <div style="
+            background: #15131a;
+            padding: 28px;
+            border-radius: 16px;
+            border: 1px solid rgba(201,162,75,0.28);
+            width: 95%;
+            max-width: 500px;
+            position: relative;
+            text-align: center;
+            color: #f2ede2;
+            max-height: 95vh;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow-y: auto;
+            font-family: 'Jura', sans-serif;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+        ">
 
-            <button id="closeFastModal" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: #948c7f; font-size: 28px; cursor: pointer; line-height: 1; z-index: 10;">&times;</button>
+            <button
+                id="closeFastModal"
+                style="
+                    position: absolute;
+                    top: 12px;
+                    right: 15px;
+                    background: none;
+                    border: none;
+                    color: #948c7f;
+                    font-size: 28px;
+                    cursor: pointer;
+                    line-height: 1;
+                    z-index: 10;
+                "
+            >&times;</button>
 
             <div style="flex-shrink: 0;">
-                <div style="width: 92px; height: 92px; margin: 0 auto 12px auto; background: #1d1922; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(201,162,75,0.2);">
-                    <img src="${currentImgPath}" alt="${escapeHTML(product.name)}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+
+                <div style="
+                    width: 92px;
+                    height: 92px;
+                    margin: 0 auto 12px auto;
+                    background: #1d1922;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                    border: 1px solid rgba(201,162,75,0.2);
+                ">
+                    <img
+                        src="${currentImgPath}"
+                        alt="${escapeHTML(product.name)}"
+                        style="
+                            max-width: 100%;
+                            max-height: 100%;
+                            object-fit: contain;
+                        "
+                    >
                 </div>
-                <h3 style="margin: 0 0 4px 0; font-size: 19px; font-family: 'Fraunces', serif; font-weight: 500; color: #f2ede2;">${escapeHTML(productNames[prodId] ? productNames[prodId][activeLang] : product.name)}</h3>
-                <p style="margin: 0 0 15px 0; color: #948c7f; font-size: 13px;">${d.lblSize}: ${selection.size} | ${d.lblColor}: ${colorText} | ${d.lblFit}: ${fitText}</p>
+
+                <h3 style="
+                    margin: 0 0 4px 0;
+                    font-size: 19px;
+                    font-family: 'Fraunces', serif;
+                    font-weight: 500;
+                    color: #f2ede2;
+                ">
+                    ${escapeHTML(
+                        productNames[prodId]
+                            ? productNames[prodId][activeLang]
+                            : product.name
+                    )}
+                </h3>
+
+                <p style="
+                    margin: 0 0 15px 0;
+                    color: #948c7f;
+                    font-size: 13px;
+                ">
+                    ${d.lblSize}: ${selection.size}
+                    |
+                    ${d.lblColor}: ${colorText}
+                    |
+                    ${d.lblFit}: ${fitText}
+                </p>
+
             </div>
 
             <!-- Форма сбора адреса доставки -->
-            <form id="fastOrderForm" action="https://formsubmit.co/lyvero.company@gmail.com" method="POST" style="text-align: left; display: flex; flex-direction: column; gap: 10px;">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="order_id" value="${orderId}">
-                <input type="hidden" name="product" value="${product.name} (${selection.size}/${selection.color}/${fitText})">
-                <input type="hidden" name="total_price" id="hiddenTotalInput" value="${initialTotal.toFixed(2)} €">
+            <form
+                id="fastOrderForm"
+                action="https://formsubmit.co/lyvero.company@gmail.com"
+                method="POST"
+                style="
+                    text-align: left;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                "
+            >
 
-                <label style="font-size: 12.5px; letter-spacing:0.04em; color: #948c7f;">${txtName}:</label>
-                <input type="text" name="customer_name" required style="padding: 10px; background: #1d1922; border: 1px solid rgba(201,162,75,0.2); color: #f2ede2; border-radius: 8px;">
+                <input
+                    type="hidden"
+                    name="_captcha"
+                    value="false"
+                >
 
-                <label style="font-size: 12.5px; letter-spacing:0.04em; color: #948c7f;">${txtPhone}:</label>
-                <input type="tel" name="customer_phone" required placeholder="+372..." style="padding: 10px; background: #1d1922; border: 1px solid rgba(201,162,75,0.2); color: #f2ede2; border-radius: 8px;">
+                <input
+                    type="hidden"
+                    name="order_id"
+                    value="${orderId}"
+                >
 
-                <label style="font-size: 12.5px; letter-spacing:0.04em; color: #948c7f;">${txtMethod}:</label>
-                <select name="shipping_method" id="fastShippingMethod" required style="padding: 10px; background: #1d1922; border: 1px solid rgba(201,162,75,0.2); color: #f2ede2; border-radius: 8px;">
-                    <option value="omniva">Omniva Pakiautomaat (€2.99)</option>
-                    <option value="dpd">DPD Pakiautomaat (€2.99)</option>
-                    <option value="europe">Smartposti Pakiautomaat (€2.99)</option>
+                <input
+                    type="hidden"
+                    name="product"
+                    value="${product.name} (${selection.size}/${selection.color}/${fitText})"
+                >
+
+                <input
+                    type="hidden"
+                    name="total_price"
+                    id="hiddenTotalInput"
+                    value="${initialTotal.toFixed(2)} €"
+                >
+
+                <label style="
+                    font-size: 12.5px;
+                    letter-spacing: 0.04em;
+                    color: #948c7f;
+                ">
+                    ${txtName}:
+                </label>
+
+                <input
+                    type="text"
+                    name="customer_name"
+                    required
+                    style="
+                        padding: 10px;
+                        background: #1d1922;
+                        border: 1px solid rgba(201,162,75,0.2);
+                        color: #f2ede2;
+                        border-radius: 8px;
+                    "
+                >
+
+                <label style="
+                    font-size: 12.5px;
+                    letter-spacing: 0.04em;
+                    color: #948c7f;
+                ">
+                    ${txtPhone}:
+                </label>
+
+                <input
+                    type="tel"
+                    name="customer_phone"
+                    required
+                    placeholder="+372..."
+                    style="
+                        padding: 10px;
+                        background: #1d1922;
+                        border: 1px solid rgba(201,162,75,0.2);
+                        color: #f2ede2;
+                        border-radius: 8px;
+                    "
+                >
+
+                <label style="
+                    font-size: 12.5px;
+                    letter-spacing: 0.04em;
+                    color: #948c7f;
+                ">
+                    ${txtMethod}:
+                </label>
+
+                <select
+                    name="shipping_method"
+                    id="fastShippingMethod"
+                    required
+                    style="
+                        padding: 10px;
+                        background: #1d1922;
+                        border: 1px solid rgba(201,162,75,0.2);
+                        color: #f2ede2;
+                        border-radius: 8px;
+                    "
+                >
+                    <option value="omniva">
+                        Omniva Pakiautomaat (€2.99)
+                    </option>
+
+                    <option value="dpd">
+                        DPD Pakiautomaat (€2.99)
+                    </option>
+
+                    <option value="europe">
+                        Smartposti Pakiautomaat (€2.99)
+                    </option>
                 </select>
 
-                <label style="font-size: 12.5px; letter-spacing:0.04em; color: #948c7f;">${txtAddress}:</label>
-                <textarea name="delivery_address" required rows="2" placeholder="Таллинн, Kaubamaja Omniva..." style="padding: 10px; background: #1d1922; border: 1px solid rgba(201,162,75,0.2); color: #f2ede2; border-radius: 8px; resize: none;"></textarea>
+                <label style="
+                    font-size: 12.5px;
+                    letter-spacing: 0.04em;
+                    color: #948c7f;
+                ">
+                    ${txtAddress}:
+                </label>
+
+                <textarea
+                    name="delivery_address"
+                    required
+                    rows="2"
+                    placeholder="Таллинн, Kaubamaja Omniva..."
+                    style="
+                        padding: 10px;
+                        background: #1d1922;
+                        border: 1px solid rgba(201,162,75,0.2);
+                        color: #f2ede2;
+                        border-radius: 8px;
+                        resize: none;
+                    "
+                ></textarea>
 
                 <!-- Динамический текст итоговой стоимости -->
-                <div style="margin-top: 5px; padding: 12px; background: #1d1922; border-radius: 8px; text-align: center; border: 1px dashed rgba(201,162,75,0.3);">
-                    <span style="font-size: 13px; color: #948c7f;">${txtTotal}:</span>
-                    <strong id="modalTotalDisplay" style="font-size: 19px; color: #e6c583; margin-left: 6px; font-family: 'Fraunces', serif;">${initialTotal.toFixed(2)} €</strong>
+                <div style="
+                    margin-top: 5px;
+                    padding: 12px;
+                    background: #1d1922;
+                    border-radius: 8px;
+                    text-align: center;
+                    border: 1px dashed rgba(201,162,75,0.3);
+                ">
+                    <span style="
+                        font-size: 13px;
+                        color: #948c7f;
+                    ">
+                        ${txtTotal}:
+                    </span>
+
+                    <strong
+                        id="modalTotalDisplay"
+                        style="
+                            font-size: 19px;
+                            color: #e6c583;
+                            margin-left: 6px;
+                            font-family: 'Fraunces', serif;
+                        "
+                    >
+                        ${initialTotal.toFixed(2)} €
+                    </strong>
                 </div>
 
-                <button type="submit" id="fastSubmitBtn" style="padding: 13px; background: #c9a24b; color: #0b0a0d; border: none; border-radius: 8px; font-weight: 700; letter-spacing:0.04em; text-transform: uppercase; font-size: 13px; cursor: pointer; margin-top: 6px; transition: background 0.2s;">${txtBtnSave}</button>
+                <button
+                    type="submit"
+                    id="fastSubmitBtn"
+                    style="
+                        padding: 13px;
+                        background: #c9a24b;
+                        color: #0b0a0d;
+                        border: none;
+                        border-radius: 8px;
+                        font-weight: 700;
+                        letter-spacing: 0.04em;
+                        text-transform: uppercase;
+                        font-size: 13px;
+                        cursor: pointer;
+                        margin-top: 6px;
+                        transition: background 0.2s;
+                    "
+                >
+                    ${txtBtnSave}
+                </button>
+
             </form>
 
             <!-- Контейнер для PayPal -->
-            <div id="paypal-fast-container" style="display: none; margin-top: 16px; min-height: 150px;">
-                <p style="color: #7fc97f; font-weight: 600; margin-bottom: 15px; font-size: 13.5px;">✓ Данные доставки сохранены. Оплатите заказ:</p>
+            <div
+                id="paypal-fast-container"
+                style="
+                    display: none;
+                    margin-top: 16px;
+                    min-height: 150px;
+                "
+            >
+                <p style="
+                    color: #7fc97f;
+                    font-weight: 600;
+                    margin-bottom: 15px;
+                    font-size: 13.5px;
+                ">
+                    ✓ Данные доставки сохранены. Оплатите заказ:
+                </p>
+
                 <div id="paypal-buttons-inside"></div>
             </div>
+
         </div>
     `;
 
@@ -181,7 +488,7 @@ function buyNow(prodId) {
     const totalDisplay = document.getElementById('modalTotalDisplay');
     const hiddenTotalInput = document.getElementById('hiddenTotalInput');
 
-    // Функция перерасчета стоимости «на лету»
+    // Функция перерасчета стоимости
     function recalculate() {
         const selectedShipping = shippingSelect.value;
         const shippingPrice = shippingRates[selectedShipping] || 0;
@@ -189,6 +496,7 @@ function buyNow(prodId) {
 
         totalDisplay.innerText = `${finalPrice.toFixed(2)} €`;
         hiddenTotalInput.value = `${finalPrice.toFixed(2)} €`;
+
         return finalPrice;
     }
 
@@ -212,20 +520,35 @@ function buyNow(prodId) {
         fetch(form.action, {
             method: 'POST',
             body: new FormData(form),
-            headers: { 'Accept': 'application/json' }
+            headers: {
+                'Accept': 'application/json'
+            }
         })
         .then(() => {
+
             form.style.display = 'none';
+
             document.getElementById('paypal-fast-container').style.display = 'block';
 
             if (window.paypal && window.paypal.Buttons) {
+
                 window.paypal.Buttons({
-                    style: { layout: 'vertical', color: 'gold', shape: 'rect', label: 'buynow' },
+
+                    style: {
+                        layout: 'vertical',
+                        color: 'gold',
+                        shape: 'rect',
+                        label: 'buynow'
+                    },
+
                     createOrder: function(data, actions) {
                         return actions.order.create({
                             purchase_units: [{
                                 invoice_id: orderId,
-                                description: `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color}/${fitText})`,
+
+                                description:
+                                    `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color}/${fitText})`,
+
                                 amount: {
                                     currency_code: "EUR",
                                     value: finalPrice.toFixed(2)
@@ -233,22 +556,34 @@ function buyNow(prodId) {
                             }]
                         });
                     },
+
                     onApprove: function(data, actions) {
+
                         return actions.order.capture().then(function(details) {
-                            showMessage(activeLang === 'et' ? "Edukalt makstud! ✔" : "Success! ✔");
+
+                            showMessage(
+                                activeLang === 'et'
+                                    ? "Edukalt makstud! ✔"
+                                    : "Success! ✔"
+                            );
+
                             payModal.style.display = 'none';
                             document.body.style.overflow = '';
                         });
                     },
+
                     onError: function(err) {
                         console.error(err);
                         showMessage("PayPal Error ❌");
                     }
+
                 }).render('#paypal-buttons-inside');
             }
         })
         .catch(() => {
+
             alert('Error saving data.');
+
             submitBtn.disabled = false;
             submitBtn.innerText = txtBtnSave;
         });
@@ -257,71 +592,124 @@ function buyNow(prodId) {
 
 // Переход к оплате из корзины
 checkoutBtn.addEventListener("click", () => {
+
     if (cart.length === 0) {
         showMessage(dictionary[activeLang].msgEmpty);
         return;
     }
-    window.open("https://www.paypal.com/ncp/payment/6EME7F92SFN36", "_blank");
+
+    window.open(
+        "https://www.paypal.com/ncp/payment/6EME7F92SFN36",
+        "_blank"
+    );
 });
 
-// Добавление товара в корзину (для будущих .cart-btn, если появятся)
+// Добавление товара в корзину
 buttons.forEach(button => {
+
     button.addEventListener("click", () => {
+
         const card = button.closest(".product-card");
+
         const name = card.querySelector("h3").textContent;
         const price = card.querySelector(".product-price").textContent;
         const image = card.querySelector(".product-image").src;
         const size = card.querySelector(".options select:last-of-type").value;
 
-        cart.push({ name, price, image, size });
+        cart.push({
+            name,
+            price,
+            image,
+            size
+        });
+
         updateCart();
-        showMessage(dictionary[activeLang].msgAdded);
+
+        showMessage(
+            dictionary[activeLang].msgAdded
+        );
     });
 });
 
 // Обновление корзины
 function updateCart() {
+
     counter.textContent = cart.length;
+
     const totalElement = document.querySelector(".cart-total");
 
     if (cart.length === 0) {
-        cartItems.innerHTML = `<p id="lang-cart-empty">${dictionary[activeLang].cartEmpty}</p>`;
+
+        cartItems.innerHTML =
+            `<p id="lang-cart-empty">${dictionary[activeLang].cartEmpty}</p>`;
+
         if (totalElement) {
-            totalElement.textContent = dictionary[activeLang].cartTotal + "0 €";
+            totalElement.textContent =
+                dictionary[activeLang].cartTotal + "0 €";
         }
+
         return;
     }
 
     cartItems.innerHTML = "";
+
     let total = 0;
 
     cart.forEach((item, index) => {
+
         const priceNumber = parseFloat(item.price);
+
         total += priceNumber;
 
         cartItems.innerHTML += `
         <div class="cart-product">
-            <img src="${item.image}" class="cart-img">
+
+            <img
+                src="${item.image}"
+                class="cart-img"
+            >
+
             <div class="cart-info">
+
                 <span>${item.name}</span>
-                <small>${dictionary[activeLang].cartSize}${item.size}</small>
+
+                <small>
+                    ${dictionary[activeLang].cartSize}${item.size}
+                </small>
+
                 <b>${item.price}</b>
+
             </div>
-            <button class="remove-item" data-index="${index}">✕</button>
+
+            <button
+                class="remove-item"
+                data-index="${index}"
+            >
+                ✕
+            </button>
+
         </div>
         `;
     });
 
     if (totalElement) {
-        totalElement.textContent = dictionary[activeLang].cartTotal + total + " €";
+        totalElement.textContent =
+            dictionary[activeLang].cartTotal + total + " €";
     }
 
     document.querySelectorAll(".remove-item").forEach(button => {
+
         button.addEventListener("click", () => {
+
             const index = button.dataset.index;
+
             cart.splice(index, 1);
+
             updateCart();
-            showMessage(dictionary[activeLang].msgRemoved);
+
+            showMessage(
+                dictionary[activeLang].msgRemoved
+            );
         });
     });
 
@@ -337,7 +725,9 @@ cartIcon.addEventListener("click", () => {
 
 // Закрытие корзины по клику вне окна
 document.addEventListener("click", (e) => {
+
     const wrapper = document.querySelector(".cart-wrapper");
+
     if (wrapper && !wrapper.contains(e.target)) {
         cartWindow.classList.remove("active");
     }
@@ -345,21 +735,34 @@ document.addEventListener("click", (e) => {
 
 // Очистка корзины
 clearBtn.addEventListener("click", () => {
+
     cart = [];
+
     updateCart();
-    showMessage(dictionary[activeLang].msgCleared);
+
+    showMessage(
+        dictionary[activeLang].msgCleared
+    );
 });
 
 // Уведомления
 function showMessage(text) {
+
     let message = document.querySelector(".cart-message");
+
     if (!message) {
+
         message = document.createElement("div");
+
         message.className = "cart-message";
+
         document.body.appendChild(message);
     }
+
     message.textContent = text;
+
     message.classList.add("show");
+
     setTimeout(() => {
         message.classList.remove("show");
     }, 1500);
@@ -367,17 +770,27 @@ function showMessage(text) {
 
 // Смена цвета товара
 const colorSelects = document.querySelectorAll(".color-select");
+
 colorSelects.forEach(select => {
+
     select.addEventListener("change", () => {
+
         const card = select.closest(".product-card");
         const image = card.querySelector(".product-image");
+
         const color = select.value;
+
         const newImage = image.dataset[color];
 
         if (newImage) {
+
             image.src = newImage;
+
         } else {
-            showMessage(dictionary[activeLang].msgColorUnavailable);
+
+            showMessage(
+                dictionary[activeLang].msgColorUnavailable
+            );
         }
     });
 });
@@ -387,62 +800,120 @@ const searchInput = document.getElementById("search-input");
 const searchResults = document.getElementById("search-results");
 
 function closeSearchResults() {
+
     if (searchResults) {
+
         searchResults.classList.remove("active");
+
         searchResults.innerHTML = "";
     }
 }
 
 if (searchInput) {
+
     searchInput.addEventListener("input", function() {
-        const query = searchInput.value.toLowerCase().trim();
-        const cards = document.querySelectorAll(".product-card");
+
+        const query =
+            searchInput.value.toLowerCase().trim();
+
+        const cards =
+            document.querySelectorAll(".product-card");
+
         const matches = [];
 
         cards.forEach(card => {
-            const title = card.querySelector("h3").textContent.toLowerCase();
-            const isMatch = title.includes(query);
-            card.style.display = isMatch ? "" : "none";
-            if (query && isMatch) matches.push(card);
+
+            const title =
+                card.querySelector("h3").textContent.toLowerCase();
+
+            const isMatch =
+                title.includes(query);
+
+            card.style.display =
+                isMatch ? "" : "none";
+
+            if (query && isMatch) {
+                matches.push(card);
+            }
         });
 
         if (!searchResults) return;
 
         if (!query) {
+
             closeSearchResults();
+
             return;
         }
 
         if (matches.length === 0) {
-            searchResults.innerHTML = `<div class="search-no-results">${dictionary[activeLang].msgNoResults}</div>`;
+
+            searchResults.innerHTML =
+                `<div class="search-no-results">
+                    ${dictionary[activeLang].msgNoResults}
+                </div>`;
+
             searchResults.classList.add("active");
+
             return;
         }
 
         searchResults.innerHTML = "";
+
         matches.forEach(card => {
-            const name = card.querySelector("h3").textContent;
-            const image = card.querySelector(".product-image").src;
-            const item = document.createElement("button");
+
+            const name =
+                card.querySelector("h3").textContent;
+
+            const image =
+                card.querySelector(".product-image").src;
+
+            const item =
+                document.createElement("button");
+
             item.type = "button";
+
             item.className = "search-result-item";
-            item.innerHTML = `<img src="${image}" alt=""><span>${escapeHTML(name)}</span>`;
+
+            item.innerHTML =
+                `<img src="${image}" alt="">
+                 <span>${escapeHTML(name)}</span>`;
+
             item.addEventListener("click", () => {
-                document.querySelectorAll(".product-card").forEach(c => c.style.display = "");
+
+                document
+                    .querySelectorAll(".product-card")
+                    .forEach(c => c.style.display = "");
+
                 searchInput.value = "";
+
                 closeSearchResults();
-                card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+                card.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
                 card.classList.remove("search-highlight");
+
                 void card.offsetWidth;
+
                 card.classList.add("search-highlight");
-                setTimeout(() => card.classList.remove("search-highlight"), 1600);
+
+                setTimeout(
+                    () => card.classList.remove("search-highlight"),
+                    1600
+                );
             });
+
             searchResults.appendChild(item);
         });
+
         searchResults.classList.add("active");
     });
 
     document.addEventListener("click", (e) => {
+
         if (!e.target.closest(".search-wrap")) {
             closeSearchResults();
         }
@@ -451,176 +922,714 @@ if (searchInput) {
 
 // Словарь названий
 const productNames = {
-    never: { ru: "Never Give Up", en: "Never Give Up", et: "Ära anna kunagi alla" },
-    chaos: { ru: "Chaos", en: "Chaos", et: "Kaos" },
-    summer: { ru: "Summer Vibes", en: "Summer Vibes", et: "Suve meeleolu" },
-    drive: { ru: "Tokyo Drive", en: "Tokyo Drive", et: "Tokyo Sõit" },
-    samurai: { ru: "Shadow Ronin", en: "Shadow Ronin", et: "Varju Ronin" }
+
+    never: {
+        ru: "Never Give Up",
+        en: "Never Give Up",
+        et: "Ära anna kunagi alla"
+    },
+
+    chaos: {
+        ru: "Chaos",
+        en: "Chaos",
+        et: "Kaos"
+    },
+
+    summer: {
+        ru: "Summer Vibes",
+        en: "Summer Vibes",
+        et: "Suve meeleolu"
+    },
+
+    drive: {
+        ru: "Tokyo Drive",
+        en: "Tokyo Drive",
+        et: "Tokyo Sõit"
+    },
+
+    samurai: {
+        ru: "Shadow Ronin",
+        en: "Shadow Ronin",
+        et: "Varju Ronin"
+    }
 };
 
 // Полный словарь мультиязычности
 const dictionary = {
+
     ru: {
-        navCatalog: "Каталог", navCollections: "О нас", navContacts: "Контакты", searchPlh: "Поиск...",
-        cartTitle: "Корзина", cartEmpty: "Корзина пустая", cartCheckout: "Перейти к оплате", cartClear: "Очистить", cartTotal: "Итого: ", cartSize: "Размер: ",
-        heroSubtitle: "Чернила, которые говорят<br>за тебя.", heroBtn: "Перейти в каталог", catalogTitle: "Каталог",
-        lblColor: "Цвет", lblSize: "Размер", lblFit: "Посадка", clrBlack: "Черный", clrWhite: "Белый", btnAdd: "Добавить в корзину", btnBuy: "Купить сейчас",
-        fitSlim: "Slim fit", fitRegular: "Regular", fitRelaxed: "Relaxed", fitLoose: "Loose", fitOversize: "Oversize",
-        ftAbout: "Мы создаём одежду с уникальными принтами, вдохновлёнными искусством, культурой и современным дизайном.",
-        ftContacts: "Контакты и Социальные сети", ftSocials: "Социальные сети", scrollCue: "Листайте",
-        msgAdded: "Товар добавлен в корзину ✓", msgRemoved: "Товар удалён", msgCleared: "Корзина очищена", msgEmpty: "Корзина пустая", msgCheckout: "Переходим к оплате 💳", msgColorUnavailable: "❌ Этот цвет недоступен", msgNoResults: "Ничего не найдено"
+
+        navCatalog: "Каталог",
+        navCollections: "О нас",
+        navContacts: "Контакты",
+        searchPlh: "Поиск...",
+
+        cartTitle: "Корзина",
+        cartEmpty: "Корзина пустая",
+        cartCheckout: "Перейти к оплате",
+        cartClear: "Очистить",
+        cartTotal: "Итого: ",
+        cartSize: "Размер: ",
+
+        heroEyebrow:
+            "Ателье принта — основано в Эстонии",
+
+        heroSubtitle:
+            "Чернила, которые говорят<br>за тебя.",
+
+        heroBtn:
+            "Перейти в каталог",
+
+        catalogTitle:
+            "Каталог",
+
+        lblColor:
+            "Цвет",
+
+        lblSize:
+            "Размер",
+
+        lblFit:
+            "Посадка",
+
+        clrBlack:
+            "Черный",
+
+        clrWhite:
+            "Белый",
+
+        btnAdd:
+            "Добавить в корзину",
+
+        btnBuy:
+            "Купить сейчас",
+
+        fitSlim:
+            "Slim fit",
+
+        fitRegular:
+            "Regular",
+
+        fitRelaxed:
+            "Relaxed",
+
+        fitLoose:
+            "Loose",
+
+        fitOversize:
+            "Oversize",
+
+        ftAbout:
+            "Мы создаём одежду с уникальными принтами, вдохновлёнными искусством, культурой и современным дизайном.",
+
+        ftContacts:
+            "Контакты и Социальные сети",
+
+        ftSocials:
+            "Социальные сети",
+
+        scrollCue:
+            "Листайте",
+
+        msgAdded:
+            "Товар добавлен в корзину ✓",
+
+        msgRemoved:
+            "Товар удалён",
+
+        msgCleared:
+            "Корзина очищена",
+
+        msgEmpty:
+            "Корзина пустая",
+
+        msgCheckout:
+            "Переходим к оплате 💳",
+
+        msgColorUnavailable:
+            "❌ Этот цвет недоступен",
+
+        msgNoResults:
+            "Ничего не найдено"
     },
+
     en: {
-        navCatalog: "Catalog", navCollections: "About us", navContacts: "Contacts", searchPlh: "Search...",
-        cartTitle: "Cart", cartEmpty: "Cart is empty", cartCheckout: "Checkout", cartClear: "Clear", cartTotal: "Total: ", cartSize: "Size: ",
-        heroSubtitle: "Inks that speak<br>for you.", heroBtn: "Go to catalog", catalogTitle: "Catalog",
-        lblColor: "Color", lblSize: "Size", lblFit: "Fit", clrBlack: "Black", clrWhite: "White", btnAdd: "Add to cart", btnBuy: "Buy now",
-        fitSlim: "Slim fit", fitRegular: "Regular", fitRelaxed: "Relaxed", fitLoose: "Loose", fitOversize: "Oversize",
-        ftAbout: "We create clothing with unique prints inspired by art, culture, and modern design.",
-        ftContacts: "Contacts and Social Networks", ftSocials: "Social Networks", scrollCue: "Scroll",
-        msgAdded: "Item added to cart ✓", msgRemoved: "Item removed", msgCleared: "Cart cleared", msgEmpty: "Cart is empty", msgCheckout: "Proceeding to checkout 💳", msgColorUnavailable: "❌ This color is unavailable", msgNoResults: "No results found"
+
+        navCatalog:
+            "Catalog",
+
+        navCollections:
+            "About us",
+
+        navContacts:
+            "Contacts",
+
+        searchPlh:
+            "Search...",
+
+        cartTitle:
+            "Cart",
+
+        cartEmpty:
+            "Cart is empty",
+
+        cartCheckout:
+            "Checkout",
+
+        cartClear:
+            "Clear",
+
+        cartTotal:
+            "Total: ",
+
+        cartSize:
+            "Size: ",
+
+        heroEyebrow:
+            "Print atelier — founded in Estonia",
+
+        heroSubtitle:
+            "Inks that speak<br>for you.",
+
+        heroBtn:
+            "Go to catalog",
+
+        catalogTitle:
+            "Catalog",
+
+        lblColor:
+            "Color",
+
+        lblSize:
+            "Size",
+
+        lblFit:
+            "Fit",
+
+        clrBlack:
+            "Black",
+
+        clrWhite:
+            "White",
+
+        btnAdd:
+            "Add to cart",
+
+        btnBuy:
+            "Buy now",
+
+        fitSlim:
+            "Slim fit",
+
+        fitRegular:
+            "Regular",
+
+        fitRelaxed:
+            "Relaxed",
+
+        fitLoose:
+            "Loose",
+
+        fitOversize:
+            "Oversize",
+
+        ftAbout:
+            "We create clothing with unique prints inspired by art, culture, and modern design.",
+
+        ftContacts:
+            "Contacts and Social Networks",
+
+        ftSocials:
+            "Social Networks",
+
+        scrollCue:
+            "Scroll",
+
+        msgAdded:
+            "Item added to cart ✓",
+
+        msgRemoved:
+            "Item removed",
+
+        msgCleared:
+            "Cart cleared",
+
+        msgEmpty:
+            "Cart is empty",
+
+        msgCheckout:
+            "Proceeding to checkout 💳",
+
+        msgColorUnavailable:
+            "❌ This color is unavailable",
+
+        msgNoResults:
+            "No results found"
     },
+
     et: {
-        navCatalog: "Kataloog", navCollections: "Meie kohta", navContacts: "Kontaktid", searchPlh: "Otsi...",
-        cartTitle: "Ostukorv", cartEmpty: "Ostukorv on tühi", cartCheckout: "Vormista ost", cartClear: "Tühjenda", cartTotal: "Kokku: ", cartSize: "Suurus: ",
-        heroSubtitle: "Tindid, mis räägivad<br>Sinu eest.", heroBtn: "Mine kataloogi", catalogTitle: "Kataloog",
-        lblColor: "Värv", lblSize: "Suurus", lblFit: "Lõige", clrBlack: "Must", clrWhite: "Valge", btnAdd: "Lisa ostukorvi", btnBuy: "Osta kohe",
-        fitSlim: "Slim fit", fitRegular: "Regular", fitRelaxed: "Relaxed", fitLoose: "Loose", fitOversize: "Oversize",
-        ftAbout: "Loome unikaalsete printidega rõivaid, mis on inspireeritud kunstist, kultuurist ja kaasegsest disainist.",
-        ftContacts: "Kontaktid ja sotsiaalmeedia", ftSocials: "Sotsiaalmeedia", scrollCue: "Keri edasi",
-        msgAdded: "Toode lisatud ostukorvi ✓", msgRemoved: "Toode eemaldatud", msgCleared: "Ostukorv tühjendatud", msgEmpty: "Ostukorv on tühi", msgCheckout: "Suundume maksmisele 💳", msgColorUnavailable: "❌ See värv pole saadaval", msgNoResults: "Tulemusi ei leitud"
+
+        navCatalog:
+            "Kataloog",
+
+        navCollections:
+            "Meie kohta",
+
+        navContacts:
+            "Kontaktid",
+
+        searchPlh:
+            "Otsi...",
+
+        cartTitle:
+            "Ostukorv",
+
+        cartEmpty:
+            "Ostukorv on tühi",
+
+        cartCheckout:
+            "Vormista ost",
+
+        cartClear:
+            "Tühjenda",
+
+        cartTotal:
+            "Kokku: ",
+
+        cartSize:
+            "Suurus: ",
+
+        heroEyebrow:
+            "Trükiateljee — asutatud Eestis",
+
+        heroSubtitle:
+            "Tindid, mis räägivad<br>Sinu eest.",
+
+        heroBtn:
+            "Mine kataloogi",
+
+        catalogTitle:
+            "Kataloog",
+
+        lblColor:
+            "Värv",
+
+        lblSize:
+            "Suurus",
+
+        lblFit:
+            "Lõige",
+
+        clrBlack:
+            "Must",
+
+        clrWhite:
+            "Valge",
+
+        btnAdd:
+            "Lisa ostukorvi",
+
+        btnBuy:
+            "Osta kohe",
+
+        fitSlim:
+            "Slim fit",
+
+        fitRegular:
+            "Regular",
+
+        fitRelaxed:
+            "Relaxed",
+
+        fitLoose:
+            "Loose",
+
+        fitOversize:
+            "Oversize",
+
+        ftAbout:
+            "Loome unikaalsete printidega rõivaid, mis on inspireeritud kunstist, kultuurist ja kaasegsest disainist.",
+
+        ftContacts:
+            "Kontaktid ja sotsiaalmeedia",
+
+        ftSocials:
+            "Sotsiaalmeedia",
+
+        scrollCue:
+            "Keri edasi",
+
+        msgAdded:
+            "Toode lisatud ostukorvi ✓",
+
+        msgRemoved:
+            "Toode eemaldatud",
+
+        msgCleared:
+            "Ostukorv tühjendatud",
+
+        msgEmpty:
+            "Ostukorv on tühi",
+
+        msgCheckout:
+            "Suundume maksmisele 💳",
+
+        msgColorUnavailable:
+            "❌ See värv pole saadaval",
+
+        msgNoResults:
+            "Tulemusi ei leitud"
     }
 };
 
 let activeLang = "ru";
 
 function applyCartTranslation() {
-    const d = dictionary[activeLang];
-    const cartTitleEl = document.getElementById("lang-cart-title");
-    const cartEmptyEl = document.getElementById("lang-cart-empty");
-    if (cartTitleEl) cartTitleEl.textContent = d.cartTitle;
-    if (cartEmptyEl) cartEmptyEl.textContent = d.cartEmpty;
 
-    const totalEl = document.querySelector(".cart-total");
-    if (totalEl && cart.length > 0) {
-        let totalSum = 0;
-        cart.forEach(item => totalSum += parseFloat(item.price));
-        totalEl.textContent = d.cartTotal + totalSum + " €";
-    } else if (totalEl) {
-        totalEl.textContent = d.cartTotal + "0 €";
+    const d = dictionary[activeLang];
+
+    const cartTitleEl =
+        document.getElementById("lang-cart-title");
+
+    const cartEmptyEl =
+        document.getElementById("lang-cart-empty");
+
+    if (cartTitleEl) {
+        cartTitleEl.textContent = d.cartTitle;
     }
 
-    document.querySelectorAll(".cart-product").forEach(cartProd => {
-        const nameSpan = cartProd.querySelector(".cart-info span");
-        const sizeSmall = cartProd.querySelector(".cart-info small");
+    if (cartEmptyEl) {
+        cartEmptyEl.textContent = d.cartEmpty;
+    }
 
-        if (nameSpan) {
-            let origName = nameSpan.textContent;
-            for (let id in productNames) {
-                if (productNames[id].ru === origName || productNames[id].en === origName || productNames[id].et === origName) {
-                    nameSpan.textContent = productNames[id][activeLang];
-                    break;
-                }
-            }
-        }
-        if (sizeSmall) {
-            const currentSize = sizeSmall.textContent.replace("Размер:", "").replace("Size:", "").replace("Suurus:", "").trim();
-            sizeSmall.textContent = d.cartSize + currentSize;
-        }
-    });
-}
+    const totalEl =
+        document.querySelector(".cart-total");
 
-const langSelect = document.getElementById("language-select");
-if (langSelect) {
-    langSelect.addEventListener("change", (e) => {
-        activeLang = e.target.value;
-        const d = dictionary[activeLang];
+    if (totalEl && cart.length > 0) {
 
-        document.getElementById("lang-nav-catalog").textContent = d.navCatalog;
-        document.getElementById("lang-nav-collections").textContent = d.navCollections;
-        document.getElementById("lang-nav-contacts").textContent = d.navContacts;
-        document.getElementById("search-input").placeholder = d.searchPlh;
+        let totalSum = 0;
 
-        document.getElementById("lang-hero-subtitle").innerHTML = d.heroSubtitle;
-        document.getElementById("lang-hero-btn").textContent = d.heroBtn;
-
-        document.getElementById("lang-catalog-title").textContent = d.catalogTitle;
-
-        document.querySelectorAll(".product-card").forEach(card => {
-            const pId = card.getAttribute("data-product-id");
-            if (pId && productNames[pId]) {
-                card.querySelector(".lang-p-title").textContent = productNames[pId][activeLang];
-            }
+        cart.forEach(item => {
+            totalSum += parseFloat(item.price);
         });
 
-        document.querySelectorAll(".lang-label-color").forEach(el => el.textContent = d.lblColor);
-        document.querySelectorAll(".lang-label-size").forEach(el => el.textContent = d.lblSize);
-        document.querySelectorAll(".lang-label-fit").forEach(el => el.textContent = d.lblFit);
-        document.querySelectorAll(".lang-color-black").forEach(el => el.textContent = d.clrBlack);
-        document.querySelectorAll(".lang-color-white").forEach(el => el.textContent = d.clrWhite);
-        document.querySelectorAll(".lang-fit-slim").forEach(el => el.textContent = d.fitSlim);
-        document.querySelectorAll(".lang-fit-regular").forEach(el => el.textContent = d.fitRegular);
-        document.querySelectorAll(".lang-fit-relaxed").forEach(el => el.textContent = d.fitRelaxed);
-        document.querySelectorAll(".lang-fit-loose").forEach(el => el.textContent = d.fitLoose);
-        document.querySelectorAll(".lang-fit-oversize").forEach(el => el.textContent = d.fitOversize);
-        document.querySelectorAll(".lang-btn-add").forEach(el => el.textContent = d.btnAdd);
-        document.querySelectorAll(".lang-btn-buy").forEach(el => el.textContent = d.btnBuy);
+        totalEl.textContent =
+            d.cartTotal + totalSum + " €";
 
-        const scrollCueEl = document.getElementById("lang-scroll-cue");
-        if (scrollCueEl) scrollCueEl.textContent = d.scrollCue;
+    } else if (totalEl) {
 
-        document.getElementById("lang-cart-checkout").textContent = d.cartCheckout;
-        document.getElementById("lang-cart-clear").textContent = d.cartClear;
+        totalEl.textContent =
+            d.cartTotal + "0 €";
+    }
+
+    document
+        .querySelectorAll(".cart-product")
+        .forEach(cartProd => {
+
+            const nameSpan =
+                cartProd.querySelector(".cart-info span");
+
+            const sizeSmall =
+                cartProd.querySelector(".cart-info small");
+
+            if (nameSpan) {
+
+                let origName =
+                    nameSpan.textContent;
+
+                for (let id in productNames) {
+
+                    if (
+                        productNames[id].ru === origName ||
+                        productNames[id].en === origName ||
+                        productNames[id].et === origName
+                    ) {
+
+                        nameSpan.textContent =
+                            productNames[id][activeLang];
+
+                        break;
+                    }
+                }
+            }
+
+            if (sizeSmall) {
+
+                const currentSize =
+                    sizeSmall.textContent
+                        .replace("Размер:", "")
+                        .replace("Size:", "")
+                        .replace("Suurus:", "")
+                        .trim();
+
+                sizeSmall.textContent =
+                    d.cartSize + currentSize;
+            }
+        });
+}
+
+const langSelect =
+    document.getElementById("language-select");
+
+if (langSelect) {
+
+    langSelect.addEventListener("change", (e) => {
+
+        activeLang = e.target.value;
+
+        const d = dictionary[activeLang];
+
+        document.getElementById(
+            "lang-nav-catalog"
+        ).textContent = d.navCatalog;
+
+        document.getElementById(
+            "lang-nav-collections"
+        ).textContent = d.navCollections;
+
+        document.getElementById(
+            "lang-nav-contacts"
+        ).textContent = d.navContacts;
+
+        document.getElementById(
+            "search-input"
+        ).placeholder = d.searchPlh;
+
+        // Перевод верхней надписи
+        const heroEyebrowEl =
+            document.getElementById("lang-hero-eyebrow");
+
+        if (heroEyebrowEl) {
+            heroEyebrowEl.textContent =
+                d.heroEyebrow;
+        }
+
+        document.getElementById(
+            "lang-hero-subtitle"
+        ).innerHTML = d.heroSubtitle;
+
+        document.getElementById(
+            "lang-hero-btn"
+        ).textContent = d.heroBtn;
+
+        document.getElementById(
+            "lang-catalog-title"
+        ).textContent = d.catalogTitle;
+
+        document
+            .querySelectorAll(".product-card")
+            .forEach(card => {
+
+                const pId =
+                    card.getAttribute("data-product-id");
+
+                if (
+                    pId &&
+                    productNames[pId]
+                ) {
+
+                    card.querySelector(
+                        ".lang-p-title"
+                    ).textContent =
+                        productNames[pId][activeLang];
+                }
+            });
+
+        document
+            .querySelectorAll(".lang-label-color")
+            .forEach(el => {
+                el.textContent = d.lblColor;
+            });
+
+        document
+            .querySelectorAll(".lang-label-size")
+            .forEach(el => {
+                el.textContent = d.lblSize;
+            });
+
+        document
+            .querySelectorAll(".lang-label-fit")
+            .forEach(el => {
+                el.textContent = d.lblFit;
+            });
+
+        document
+            .querySelectorAll(".lang-color-black")
+            .forEach(el => {
+                el.textContent = d.clrBlack;
+            });
+
+        document
+            .querySelectorAll(".lang-color-white")
+            .forEach(el => {
+                el.textContent = d.clrWhite;
+            });
+
+        document
+            .querySelectorAll(".lang-fit-slim")
+            .forEach(el => {
+                el.textContent = d.fitSlim;
+            });
+
+        document
+            .querySelectorAll(".lang-fit-regular")
+            .forEach(el => {
+                el.textContent = d.fitRegular;
+            });
+
+        document
+            .querySelectorAll(".lang-fit-relaxed")
+            .forEach(el => {
+                el.textContent = d.fitRelaxed;
+            });
+
+        document
+            .querySelectorAll(".lang-fit-loose")
+            .forEach(el => {
+                el.textContent = d.fitLoose;
+            });
+
+        document
+            .querySelectorAll(".lang-fit-oversize")
+            .forEach(el => {
+                el.textContent = d.fitOversize;
+            });
+
+        document
+            .querySelectorAll(".lang-btn-add")
+            .forEach(el => {
+                el.textContent = d.btnAdd;
+            });
+
+        document
+            .querySelectorAll(".lang-btn-buy")
+            .forEach(el => {
+                el.textContent = d.btnBuy;
+            });
+
+        const scrollCueEl =
+            document.getElementById("lang-scroll-cue");
+
+        if (scrollCueEl) {
+            scrollCueEl.textContent =
+                d.scrollCue;
+        }
+
+        document.getElementById(
+            "lang-cart-checkout"
+        ).textContent = d.cartCheckout;
+
+        document.getElementById(
+            "lang-cart-clear"
+        ).textContent = d.cartClear;
+
         applyCartTranslation();
 
-        document.getElementById("lang-footer-about").textContent = d.ftAbout;
-        document.getElementById("lang-footer-contacts-title").textContent = d.ftContacts;
-        document.getElementById("lang-footer-socials").textContent = d.ftSocials;
+        document.getElementById(
+            "lang-footer-about"
+        ).textContent = d.ftAbout;
+
+        document.getElementById(
+            "lang-footer-contacts-title"
+        ).textContent = d.ftContacts;
+
+        document.getElementById(
+            "lang-footer-socials"
+        ).textContent = d.ftSocials;
     });
 }
 
-document.querySelectorAll(".buy-btn").forEach(button => {
-    button.addEventListener("click", () => {
-        const card = button.closest(".product-card");
-        const prodId = card.getAttribute("data-product-id");
+document
+    .querySelectorAll(".buy-btn")
+    .forEach(button => {
 
-        if (prodId) {
-            buyNow(prodId);
-        }
+        button.addEventListener("click", () => {
+
+            const card =
+                button.closest(".product-card");
+
+            const prodId =
+                card.getAttribute("data-product-id");
+
+            if (prodId) {
+                buyNow(prodId);
+            }
+        });
     });
-});
 
 // =========================================================================
 // ФИКСИРОВАННАЯ ШАПКА — фон появляется при прокрутке
 // =========================================================================
-const siteNav = document.getElementById("siteNav");
+
+const siteNav =
+    document.getElementById("siteNav");
+
 if (siteNav) {
+
     const toggleNav = () => {
+
         if (window.scrollY > 40) {
+
             siteNav.classList.add("scrolled");
+
         } else {
+
             siteNav.classList.remove("scrolled");
         }
     };
+
     toggleNav();
-    window.addEventListener("scroll", toggleNav, { passive: true });
+
+    window.addEventListener(
+        "scroll",
+        toggleNav,
+        { passive: true }
+    );
 }
 
 // =========================================================================
 // ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ ПРИ ПРОКРУТКЕ
 // =========================================================================
-const revealItems = document.querySelectorAll(".reveal");
-if ("IntersectionObserver" in window && revealItems.length) {
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("in-view");
-                revealObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.15 });
 
-    revealItems.forEach(item => revealObserver.observe(item));
+const revealItems =
+    document.querySelectorAll(".reveal");
+
+if (
+    "IntersectionObserver" in window &&
+    revealItems.length
+) {
+
+    const revealObserver =
+        new IntersectionObserver(
+            (entries) => {
+
+                entries.forEach(entry => {
+
+                    if (entry.isIntersecting) {
+
+                        entry.target.classList.add(
+                            "in-view"
+                        );
+
+                        revealObserver.unobserve(
+                            entry.target
+                        );
+                    }
+                });
+
+            },
+            {
+                threshold: 0.15
+            }
+        );
+
+    revealItems.forEach(item =>
+        revealObserver.observe(item)
+    );
+
 } else {
-    revealItems.forEach(item => item.classList.add("in-view"));
+
+    revealItems.forEach(item =>
+        item.classList.add("in-view")
+    );
 }
