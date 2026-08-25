@@ -1,3 +1,27 @@
+/* ======================================================================
+   НАСТРОЙКА EMAILJS — автописьмо клиенту "Спасибо за заказ"
+   ------------------------------------------------------------------
+   Письмо клиенту отправляется ТОЛЬКО после успешной оплаты PayPal.
+   ====================================================================== */
+const EMAILJS_PUBLIC_KEY  = "6ck12n75Ku0jwZinW";
+const EMAILJS_SERVICE_ID  = "service_ee9a096";
+const EMAILJS_TEMPLATE_ID = "template_kco6uyf";
+
+if (window.emailjs && EMAILJS_PUBLIC_KEY) {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+}
+
+function sendCustomerConfirmationEmail(params) {
+    if (!window.emailjs || !EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
+        console.warn('EmailJS не настроен — письмо клиенту не отправлено. См. комментарий "НАСТРОЙКА EMAILJS" в начале script.js.');
+        return;
+    }
+
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params).catch(err => {
+        console.error('EmailJS error:', err);
+    });
+}
+
 let cart = [];
 
 const buttons = document.querySelectorAll(".cart-btn");
@@ -23,12 +47,19 @@ const shippingRates = {
     "europe": 2.99
 };
 
+// Официальные страницы с картами пунктов выдачи по каждому перевозчику
+const carrierLocatorLinks = {
+    omniva: "https://www.omniva.ee/asukohad",
+    dpd: "https://www.dpd.ee/",
+    europe: "https://www.smartpost.ee/"
+};
+
 // =========================================================================
 // ДАННЫЕ О ТОВАРАХ И ИХ ТЕКУЩЕМ ВЫБОРЕ ДЛЯ МОДАЛКИ PAYPAL
 // =========================================================================
 
 const products = [
-    { id: 'never', name: 'Never Give Up', price: 15.00, colors: { black: 'images/never.png', white: 'images/Never Give Up.png' } },
+    { id: 'never', name: 'Never Give Up', price: 15.00, colors: { black: 'images/Never Give Up.png', white: 'images/Never Give Up.png' } },
     { id: 'chaos', name: 'Chaos', price: 15.00, colors: { black: 'images/Chaos (2).png', white: 'images/Chaos (2).png' } },
     { id: 'summer', name: 'Summer Vibes', price: 15.00, colors: { black: 'images/Summer Vibes Black.png', white: 'images/Summer Vibes White.png' } },
     { id: 'drive', name: 'Tokyo Drive', price: 15.00, colors: { black: 'images/Tokyo Drive Black.png', white: 'images/Tokyo Drive White.png' } },
@@ -78,21 +109,213 @@ function updateCatalogSelection() {
 updateCatalogSelection();
 
 // =========================================================================
-// ФУНКЦИЯ БЫСТРОЙ ОПЛАТЫ + СБОР ДАННЫХ ДОСТАВКИ И РАСЧЕТ СУММЫ
+// КАРТА ВЫБОРА МЕСТА ДОСТАВКИ
+// =========================================================================
+
+function initDeliveryMap() {
+    const canvas = document.getElementById('fastMapCanvas');
+
+    if (!canvas || !window.L) return;
+
+    const map = L.map(canvas, {
+        attributionControl: true
+    }).setView([59.4370, 24.7536], 12);
+
+    L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }
+    ).addTo(map);
+
+    let marker = null;
+
+    const addressField =
+        document.getElementById('fastDeliveryAddress');
+
+    function setMarker(lat, lon, popupText) {
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        marker = L.marker([lat, lon], {
+            draggable: true
+        }).addTo(map);
+
+        if (popupText) {
+            marker
+                .bindPopup(popupText)
+                .openPopup();
+        }
+
+        marker.on('dragend', () => {
+            const pos = marker.getLatLng();
+
+            reverseGeocode(
+                pos.lat,
+                pos.lng
+            );
+        });
+    }
+
+    function reverseGeocode(lat, lon) {
+        fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+        )
+            .then(r => r.json())
+            .then(data => {
+                if (addressField) {
+                    addressField.value =
+                        data.display_name ||
+                        `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                }
+            })
+            .catch(() => {});
+    }
+
+    map.on('click', (e) => {
+        setMarker(
+            e.latlng.lat,
+            e.latlng.lng
+        );
+
+        reverseGeocode(
+            e.latlng.lat,
+            e.latlng.lng
+        );
+    });
+
+    const searchInputEl =
+        document.getElementById('fastMapSearchInput');
+
+    const searchBtnEl =
+        document.getElementById('fastMapSearchBtn');
+
+    function runSearch() {
+        const q =
+            (searchInputEl.value || '').trim();
+
+        if (!q) return;
+
+        fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q + ', Eesti')}`
+        )
+            .then(r => r.json())
+            .then(results => {
+                if (results && results[0]) {
+
+                    const lat =
+                        parseFloat(results[0].lat);
+
+                    const lon =
+                        parseFloat(results[0].lon);
+
+                    map.setView(
+                        [lat, lon],
+                        15
+                    );
+
+                    setMarker(
+                        lat,
+                        lon,
+                        results[0].display_name
+                    );
+
+                    if (addressField) {
+                        addressField.value =
+                            results[0].display_name;
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+
+    if (searchBtnEl) {
+        searchBtnEl.addEventListener(
+            'click',
+            runSearch
+        );
+    }
+
+    if (searchInputEl) {
+        searchInputEl.addEventListener(
+            'keydown',
+            (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    runSearch();
+                }
+            }
+        );
+    }
+
+    setTimeout(
+        () => map.invalidateSize(),
+        250
+    );
+}
+
+function renderMapLinks(method, d) {
+    const box =
+        document.getElementById('fastMapLinks');
+
+    if (!box) return;
+
+    const labels = {
+        omniva: d.mapLinkOmniva,
+        dpd: d.mapLinkDpd,
+        europe: d.mapLinkSmartpost
+    };
+
+    const href =
+        carrierLocatorLinks[method] ||
+        carrierLocatorLinks.omniva;
+
+    const label =
+        labels[method] ||
+        labels.omniva;
+
+    box.innerHTML = `
+        <a
+            class="delivery-map-link"
+            href="${href}"
+            target="_blank"
+            rel="noopener"
+        >
+            🗺 ${escapeHTML(label)}
+        </a>
+    `;
+}
+
+// =========================================================================
+// ФУНКЦИЯ БЫСТРОЙ ОПЛАТЫ
 // =========================================================================
 
 function buyNow(prodId) {
-    const product = products.find(p => p.id === prodId);
+
+    const product =
+        products.find(p => p.id === prodId);
+
     if (!product) return;
 
-    const selection = catalogSelection[prodId];
-    const currentImgPath = product.colors[selection.color] || product.colors['black'];
+    const selection =
+        catalogSelection[prodId];
 
-    let payModal = document.getElementById('paypal-fast-modal');
+    const currentImgPath =
+        product.colors[selection.color] ||
+        product.colors['black'];
+
+    let payModal =
+        document.getElementById('paypal-fast-modal');
 
     if (!payModal) {
-        payModal = document.createElement('div');
-        payModal.id = 'paypal-fast-modal';
+
+        payModal =
+            document.createElement('div');
+
+        payModal.id =
+            'paypal-fast-modal';
 
         payModal.style.cssText = `
             position: fixed;
@@ -113,7 +336,9 @@ function buyNow(prodId) {
         document.body.appendChild(payModal);
     }
 
-    const d = dictionary[activeLang] || dictionary['ru'];
+    const d =
+        dictionary[activeLang] ||
+        dictionary['ru'];
 
     const colorText =
         selection.color === 'black'
@@ -128,56 +353,82 @@ function buyNow(prodId) {
         oversize: 'fitOversize'
     };
 
-    const fitText = d[fitKeyMap[selection.fit]] || 'Regular';
+    const fitText =
+        d[fitKeyMap[selection.fit]] ||
+        'Regular';
 
-    const orderId = 'INK-' + Math.floor(Math.random() * 10000);
+    const orderId =
+        'INK-' +
+        Math.floor(Math.random() * 10000);
 
-    // Локализация текстов
     const txtName =
         activeLang === 'et'
             ? 'Sinu nimi'
-            : (activeLang === 'en'
-                ? 'Full Name'
-                : 'Ваше Имя и Фамилия');
+            : (
+                activeLang === 'en'
+                    ? 'Full Name'
+                    : 'Ваше Имя и Фамилия'
+            );
+
+    const txtEmail =
+        activeLang === 'et'
+            ? 'E-posti aadress (kinnituse jaoks)'
+            : (
+                activeLang === 'en'
+                    ? 'Email (for order confirmation)'
+                    : 'Email (для подтверждения заказа)'
+            );
 
     const txtPhone =
         activeLang === 'et'
             ? 'Telefoninumber (SMS jaoks)'
-            : (activeLang === 'en'
-                ? 'Phone (for SMS)'
-                : 'Телефон (для SMS)');
+            : (
+                activeLang === 'en'
+                    ? 'Phone (for SMS)'
+                    : 'Телефон (для SMS)'
+            );
 
     const txtMethod =
         activeLang === 'et'
             ? 'Tarneviis'
-            : (activeLang === 'en'
-                ? 'Shipping Method'
-                : 'Способ доставки');
+            : (
+                activeLang === 'en'
+                    ? 'Shipping Method'
+                    : 'Способ доставки'
+            );
 
     const txtAddress =
         activeLang === 'et'
             ? 'Pakiautomaadi või pakiautomaadi aadress'
-            : (activeLang === 'en'
-                ? 'Parcel locker or home address'
-                : 'Адрес автомата (или домашний адрес)');
+            : (
+                activeLang === 'en'
+                    ? 'Parcel locker or home address'
+                    : 'Адрес автомата (или домашний адрес)'
+            );
 
     const txtBtnSave =
         activeLang === 'et'
             ? 'Kinnita andmed'
-            : (activeLang === 'en'
-                ? 'Confirm Details'
-                : 'Подтвердить данные');
+            : (
+                activeLang === 'en'
+                    ? 'Confirm Details'
+                    : 'Подтвердить данные'
+            );
 
     const txtTotal =
         activeLang === 'et'
             ? 'Kokku tasumisele'
-            : (activeLang === 'en'
-                ? 'Total to pay'
-                : 'Итого к оплате');
+            : (
+                activeLang === 'en'
+                    ? 'Total to pay'
+                    : 'Итого к оплате'
+            );
 
-    // Начальная сумма
-    let initialShipping = shippingRates["omniva"];
-    let initialTotal = product.price + initialShipping;
+    let initialShipping =
+        shippingRates["omniva"];
+
+    let initialTotal =
+        product.price + initialShipping;
 
     payModal.innerHTML = `
         <div style="
@@ -229,6 +480,7 @@ function buyNow(prodId) {
                     overflow: hidden;
                     border: 1px solid rgba(201,162,75,0.2);
                 ">
+
                     <img
                         src="${currentImgPath}"
                         alt="${escapeHTML(product.name)}"
@@ -238,6 +490,7 @@ function buyNow(prodId) {
                             object-fit: contain;
                         "
                     >
+
                 </div>
 
                 <h3 style="
@@ -268,7 +521,6 @@ function buyNow(prodId) {
 
             </div>
 
-            <!-- Форма сбора адреса доставки -->
             <form
                 id="fastOrderForm"
                 action="https://formsubmit.co/lyvero.company@gmail.com"
@@ -332,6 +584,29 @@ function buyNow(prodId) {
                     letter-spacing: 0.04em;
                     color: #948c7f;
                 ">
+                    ${txtEmail}:
+                </label>
+
+                <input
+                    type="email"
+                    name="email"
+                    id="fastCustomerEmail"
+                    required
+                    placeholder="you@example.com"
+                    style="
+                        padding: 10px;
+                        background: #1d1922;
+                        border: 1px solid rgba(201,162,75,0.2);
+                        color: #f2ede2;
+                        border-radius: 8px;
+                    "
+                >
+
+                <label style="
+                    font-size: 12.5px;
+                    letter-spacing: 0.04em;
+                    color: #948c7f;
+                ">
                     ${txtPhone}:
                 </label>
 
@@ -369,6 +644,7 @@ function buyNow(prodId) {
                         border-radius: 8px;
                     "
                 >
+
                     <option value="omniva">
                         Omniva Pakiautomaat (€2.99)
                     </option>
@@ -380,7 +656,43 @@ function buyNow(prodId) {
                     <option value="europe">
                         Smartposti Pakiautomaat (€2.99)
                     </option>
+
                 </select>
+
+                <div class="delivery-map-block">
+
+                    <div
+                        class="delivery-map-links"
+                        id="fastMapLinks"
+                    ></div>
+
+                    <div class="delivery-map-search">
+
+                        <input
+                            type="text"
+                            id="fastMapSearchInput"
+                            placeholder="${d.mapSearchPlh}"
+                        >
+
+                        <button
+                            type="button"
+                            id="fastMapSearchBtn"
+                        >
+                            ${d.mapSearchBtn}
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="delivery-map-canvas"
+                        id="fastMapCanvas"
+                    ></div>
+
+                    <p class="delivery-map-hint">
+                        ${d.mapHint}
+                    </p>
+
+                </div>
 
                 <label style="
                     font-size: 12.5px;
@@ -392,9 +704,10 @@ function buyNow(prodId) {
 
                 <textarea
                     name="delivery_address"
+                    id="fastDeliveryAddress"
                     required
                     rows="2"
-                    placeholder="Таллинн, Kaubamaja Omniva..."
+                    placeholder="${d.addressPlh}"
                     style="
                         padding: 10px;
                         background: #1d1922;
@@ -405,7 +718,6 @@ function buyNow(prodId) {
                     "
                 ></textarea>
 
-                <!-- Динамический текст итоговой стоимости -->
                 <div style="
                     margin-top: 5px;
                     padding: 12px;
@@ -414,6 +726,7 @@ function buyNow(prodId) {
                     text-align: center;
                     border: 1px dashed rgba(201,162,75,0.3);
                 ">
+
                     <span style="
                         font-size: 13px;
                         color: #948c7f;
@@ -432,6 +745,7 @@ function buyNow(prodId) {
                     >
                         ${initialTotal.toFixed(2)} €
                     </strong>
+
                 </div>
 
                 <button
@@ -457,7 +771,6 @@ function buyNow(prodId) {
 
             </form>
 
-            <!-- Контейнер для PayPal -->
             <div
                 id="paypal-fast-container"
                 style="
@@ -466,16 +779,18 @@ function buyNow(prodId) {
                     min-height: 150px;
                 "
             >
+
                 <p style="
                     color: #7fc97f;
                     font-weight: 600;
                     margin-bottom: 15px;
                     font-size: 13.5px;
                 ">
-                    ✓ Данные доставки сохранены. Оплатите заказ:
+                    ${d.deliverySaved}
                 </p>
 
                 <div id="paypal-buttons-inside"></div>
+
             </div>
 
         </div>
@@ -484,117 +799,251 @@ function buyNow(prodId) {
     payModal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
-    const shippingSelect = document.getElementById('fastShippingMethod');
-    const totalDisplay = document.getElementById('modalTotalDisplay');
-    const hiddenTotalInput = document.getElementById('hiddenTotalInput');
+    const shippingSelect =
+        document.getElementById('fastShippingMethod');
 
-    // Функция перерасчета стоимости
+    const totalDisplay =
+        document.getElementById('modalTotalDisplay');
+
+    const hiddenTotalInput =
+        document.getElementById('hiddenTotalInput');
+
     function recalculate() {
-        const selectedShipping = shippingSelect.value;
-        const shippingPrice = shippingRates[selectedShipping] || 0;
-        const finalPrice = product.price + shippingPrice;
 
-        totalDisplay.innerText = `${finalPrice.toFixed(2)} €`;
-        hiddenTotalInput.value = `${finalPrice.toFixed(2)} €`;
+        const selectedShipping =
+            shippingSelect.value;
+
+        const shippingPrice =
+            shippingRates[selectedShipping] || 0;
+
+        const finalPrice =
+            product.price + shippingPrice;
+
+        totalDisplay.innerText =
+            `${finalPrice.toFixed(2)} €`;
+
+        hiddenTotalInput.value =
+            `${finalPrice.toFixed(2)} €`;
 
         return finalPrice;
     }
 
-    shippingSelect.addEventListener('change', recalculate);
+    renderMapLinks(
+        shippingSelect.value,
+        d
+    );
 
-    document.getElementById('closeFastModal').addEventListener('click', () => {
-        payModal.style.display = 'none';
-        document.body.style.overflow = '';
-    });
+    initDeliveryMap();
 
-    document.getElementById('fastOrderForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    shippingSelect.addEventListener(
+        'change',
+        () => {
 
-        const form = this;
-        const submitBtn = document.getElementById('fastSubmitBtn');
-        const finalPrice = recalculate();
+            recalculate();
 
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'Saving...';
+            renderMapLinks(
+                shippingSelect.value,
+                d
+            );
 
-        fetch(form.action, {
-            method: 'POST',
-            body: new FormData(form),
-            headers: {
-                'Accept': 'application/json'
-            }
-        })
-        .then(() => {
+        }
+    );
 
-            form.style.display = 'none';
+    document
+        .getElementById('closeFastModal')
+        .addEventListener('click', () => {
 
-            document.getElementById('paypal-fast-container').style.display = 'block';
+            payModal.style.display = 'none';
+            document.body.style.overflow = '';
 
-            if (window.paypal && window.paypal.Buttons) {
+        });
 
-                window.paypal.Buttons({
+    document
+        .getElementById('fastOrderForm')
+        .addEventListener('submit', function(e) {
 
-                    style: {
-                        layout: 'vertical',
-                        color: 'gold',
-                        shape: 'rect',
-                        label: 'buynow'
-                    },
+            e.preventDefault();
 
-                    createOrder: function(data, actions) {
-                        return actions.order.create({
-                            purchase_units: [{
-                                invoice_id: orderId,
+            const form = this;
 
-                                description:
-                                    `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color}/${fitText})`,
+            const submitBtn =
+                document.getElementById('fastSubmitBtn');
 
-                                amount: {
-                                    currency_code: "EUR",
-                                    value: finalPrice.toFixed(2)
+            const finalPrice =
+                recalculate();
+
+            const customerEmail =
+                document
+                    .getElementById('fastCustomerEmail')
+                    .value;
+
+            const customerName =
+                form
+                    .querySelector('[name="customer_name"]')
+                    .value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = d.savingBtn;
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(() => {
+
+                    form.style.display = 'none';
+
+                    document
+                        .getElementById('paypal-fast-container')
+                        .style.display = 'block';
+
+                    // =====================================================
+                    // ВАЖНО:
+                    // EmailJS ЗДЕСЬ БОЛЬШЕ НЕ ВЫЗЫВАЕТСЯ.
+                    //
+                    // Письмо клиенту отправится только после успешной
+                    // оплаты PayPal — внутри onApprove ниже.
+                    // =====================================================
+
+                    if (
+                        window.paypal &&
+                        window.paypal.Buttons
+                    ) {
+
+                        window.paypal.Buttons({
+
+                            style: {
+                                layout: 'vertical',
+                                color: 'gold',
+                                shape: 'rect',
+                                label: 'buynow'
+                            },
+
+                            createOrder:
+                                function(data, actions) {
+
+                                    return actions.order.create({
+
+                                        purchase_units: [{
+
+                                            invoice_id:
+                                                orderId,
+
+                                            description:
+                                                `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color}/${fitText})`,
+
+                                            amount: {
+                                                currency_code: "EUR",
+                                                value:
+                                                    finalPrice.toFixed(2)
+                                            }
+
+                                        }]
+
+                                    });
+
+                                },
+
+                            // =================================================
+                            // ОПЛАТА УСПЕШНО ЗАВЕРШЕНА
+                            // =================================================
+                            onApprove:
+                                function(data, actions) {
+
+                                    return actions
+                                        .order
+                                        .capture()
+                                        .then(function(details) {
+
+                                            // =================================
+                                            // EMAILJS ОТПРАВЛЯЕТ ПИСЬМО
+                                            // ТОЛЬКО ПОСЛЕ УСПЕШНОЙ ОПЛАТЫ
+                                            // =================================
+
+                                            sendCustomerConfirmationEmail({
+
+                                                to_email:
+                                                    customerEmail,
+
+                                                customer_name:
+                                                    customerName,
+
+                                                order_id:
+                                                    orderId,
+
+                                                product:
+                                                    `${product.name} (${selection.size}/${selection.color}/${fitText})`,
+
+                                                total_price:
+                                                    `${finalPrice.toFixed(2)} €`
+
+                                            });
+
+                                            showMessage(
+                                                d.paymentSuccess
+                                            );
+
+                                            payModal.style.display =
+                                                'none';
+
+                                            document.body.style.overflow =
+                                                '';
+
+                                        });
+
+                                },
+
+                            onError:
+                                function(err) {
+
+                                    console.error(err);
+
+                                    showMessage(
+                                        d.paypalErrorMsg
+                                    );
+
                                 }
-                            }]
-                        });
-                    },
 
-                    onApprove: function(data, actions) {
+                        }).render(
+                            '#paypal-buttons-inside'
+                        );
 
-                        return actions.order.capture().then(function(details) {
-
-                            showMessage(
-                                activeLang === 'et'
-                                    ? "Edukalt makstud! ✔"
-                                    : "Success! ✔"
-                            );
-
-                            payModal.style.display = 'none';
-                            document.body.style.overflow = '';
-                        });
-                    },
-
-                    onError: function(err) {
-                        console.error(err);
-                        showMessage("PayPal Error ❌");
                     }
 
-                }).render('#paypal-buttons-inside');
-            }
-        })
-        .catch(() => {
+                })
+                .catch(() => {
 
-            alert('Error saving data.');
+                    alert(
+                        d.saveErrorMsg
+                    );
 
-            submitBtn.disabled = false;
-            submitBtn.innerText = txtBtnSave;
+                    submitBtn.disabled =
+                        false;
+
+                    submitBtn.innerText =
+                        txtBtnSave;
+
+                });
+
         });
-    });
+
 }
 
-// Переход к оплате из корзины
+// =========================================================================
+// ПЕРЕХОД К ОПЛАТЕ ИЗ КОРЗИНЫ
+// =========================================================================
+
 checkoutBtn.addEventListener("click", () => {
 
     if (cart.length === 0) {
-        showMessage(dictionary[activeLang].msgEmpty);
+
+        showMessage(
+            dictionary[activeLang].msgEmpty
+        );
+
         return;
     }
 
@@ -602,19 +1051,33 @@ checkoutBtn.addEventListener("click", () => {
         "https://www.paypal.com/ncp/payment/6EME7F92SFN36",
         "_blank"
     );
+
 });
 
-// Добавление товара в корзину
+// =========================================================================
+// ДОБАВЛЕНИЕ ТОВАРА В КОРЗИНУ
+// =========================================================================
+
 buttons.forEach(button => {
 
     button.addEventListener("click", () => {
 
-        const card = button.closest(".product-card");
+        const card =
+            button.closest(".product-card");
 
-        const name = card.querySelector("h3").textContent;
-        const price = card.querySelector(".product-price").textContent;
-        const image = card.querySelector(".product-image").src;
-        const size = card.querySelector(".options select:last-of-type").value;
+        const name =
+            card.querySelector("h3").textContent;
+
+        const price =
+            card.querySelector(".product-price").textContent;
+
+        const image =
+            card.querySelector(".product-image").src;
+
+        const size =
+            card
+                .querySelector(".options select:last-of-type")
+                .value;
 
         cart.push({
             name,
@@ -628,24 +1091,36 @@ buttons.forEach(button => {
         showMessage(
             dictionary[activeLang].msgAdded
         );
+
     });
+
 });
 
-// Обновление корзины
+// =========================================================================
+// ОБНОВЛЕНИЕ КОРЗИНЫ
+// =========================================================================
+
 function updateCart() {
 
-    counter.textContent = cart.length;
+    counter.textContent =
+        cart.length;
 
-    const totalElement = document.querySelector(".cart-total");
+    const totalElement =
+        document.querySelector(".cart-total");
 
     if (cart.length === 0) {
 
         cartItems.innerHTML =
-            `<p id="lang-cart-empty">${dictionary[activeLang].cartEmpty}</p>`;
+            `<p id="lang-cart-empty">
+                ${dictionary[activeLang].cartEmpty}
+            </p>`;
 
         if (totalElement) {
+
             totalElement.textContent =
-                dictionary[activeLang].cartTotal + "0 €";
+                dictionary[activeLang].cartTotal +
+                "0 €";
+
         }
 
         return;
@@ -657,11 +1132,13 @@ function updateCart() {
 
     cart.forEach((item, index) => {
 
-        const priceNumber = parseFloat(item.price);
+        const priceNumber =
+            parseFloat(item.price);
 
         total += priceNumber;
 
         cartItems.innerHTML += `
+
         <div class="cart-product">
 
             <img
@@ -671,13 +1148,17 @@ function updateCart() {
 
             <div class="cart-info">
 
-                <span>${item.name}</span>
+                <span>
+                    ${item.name}
+                </span>
 
                 <small>
                     ${dictionary[activeLang].cartSize}${item.size}
                 </small>
 
-                <b>${item.price}</b>
+                <b>
+                    ${item.price}
+                </b>
 
             </div>
 
@@ -689,238 +1170,431 @@ function updateCart() {
             </button>
 
         </div>
+
         `;
+
     });
 
     if (totalElement) {
+
         totalElement.textContent =
-            dictionary[activeLang].cartTotal + total + " €";
+            dictionary[activeLang].cartTotal +
+            total +
+            " €";
+
     }
 
-    document.querySelectorAll(".remove-item").forEach(button => {
+    document
+        .querySelectorAll(".remove-item")
+        .forEach(button => {
 
-        button.addEventListener("click", () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-            const index = button.dataset.index;
+                    const index =
+                        button.dataset.index;
 
-            cart.splice(index, 1);
+                    cart.splice(
+                        index,
+                        1
+                    );
 
-            updateCart();
+                    updateCart();
 
-            showMessage(
-                dictionary[activeLang].msgRemoved
+                    showMessage(
+                        dictionary[activeLang].msgRemoved
+                    );
+
+                }
             );
-        });
-    });
 
-    if (typeof applyCartTranslation === "function") {
+        });
+
+    if (
+        typeof applyCartTranslation ===
+        "function"
+    ) {
+
         applyCartTranslation();
+
     }
+
 }
 
-// Открытие корзины
-cartIcon.addEventListener("click", () => {
-    cartWindow.classList.toggle("active");
-});
+// =========================================================================
+// ОТКРЫТИЕ КОРЗИНЫ
+// =========================================================================
 
-// Закрытие корзины по клику вне окна
-document.addEventListener("click", (e) => {
+cartIcon.addEventListener(
+    "click",
+    () => {
 
-    const wrapper = document.querySelector(".cart-wrapper");
+        cartWindow.classList.toggle(
+            "active"
+        );
 
-    if (wrapper && !wrapper.contains(e.target)) {
-        cartWindow.classList.remove("active");
     }
-});
+);
 
-// Очистка корзины
-clearBtn.addEventListener("click", () => {
+// =========================================================================
+// ЗАКРЫТИЕ КОРЗИНЫ ПО КЛИКУ ВНЕ ОКНА
+// =========================================================================
 
-    cart = [];
+document.addEventListener(
+    "click",
+    (e) => {
 
-    updateCart();
+        const wrapper =
+            document.querySelector(
+                ".cart-wrapper"
+            );
 
-    showMessage(
-        dictionary[activeLang].msgCleared
-    );
-});
+        if (
+            wrapper &&
+            !wrapper.contains(e.target)
+        ) {
 
-// Уведомления
+            cartWindow.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+);
+
+// =========================================================================
+// ОЧИСТКА КОРЗИНЫ
+// =========================================================================
+
+clearBtn.addEventListener(
+    "click",
+    () => {
+
+        cart = [];
+
+        updateCart();
+
+        showMessage(
+            dictionary[activeLang].msgCleared
+        );
+
+    }
+);
+
+// =========================================================================
+// УВЕДОМЛЕНИЯ
+// =========================================================================
+
 function showMessage(text) {
 
-    let message = document.querySelector(".cart-message");
+    let message =
+        document.querySelector(
+            ".cart-message"
+        );
 
     if (!message) {
 
-        message = document.createElement("div");
+        message =
+            document.createElement(
+                "div"
+            );
 
-        message.className = "cart-message";
+        message.className =
+            "cart-message";
 
-        document.body.appendChild(message);
+        document.body.appendChild(
+            message
+        );
+
     }
 
-    message.textContent = text;
+    message.textContent =
+        text;
 
-    message.classList.add("show");
+    message.classList.add(
+        "show"
+    );
 
-    setTimeout(() => {
-        message.classList.remove("show");
-    }, 1500);
+    setTimeout(
+        () => {
+
+            message.classList.remove(
+                "show"
+            );
+
+        },
+        1500
+    );
+
 }
 
-// Смена цвета товара
-const colorSelects = document.querySelectorAll(".color-select");
+// =========================================================================
+// СМЕНА ЦВЕТА ТОВАРА
+// =========================================================================
+
+const colorSelects =
+    document.querySelectorAll(
+        ".color-select"
+    );
 
 colorSelects.forEach(select => {
 
-    select.addEventListener("change", () => {
+    select.addEventListener(
+        "change",
+        () => {
 
-        const card = select.closest(".product-card");
-        const image = card.querySelector(".product-image");
+            const card =
+                select.closest(
+                    ".product-card"
+                );
 
-        const color = select.value;
+            const image =
+                card.querySelector(
+                    ".product-image"
+                );
 
-        const newImage = image.dataset[color];
+            const color =
+                select.value;
 
-        if (newImage) {
+            const newImage =
+                image.dataset[color];
 
-            image.src = newImage;
+            if (newImage) {
 
-        } else {
+                image.src =
+                    newImage;
 
-            showMessage(
-                dictionary[activeLang].msgColorUnavailable
-            );
+            } else {
+
+                showMessage(
+                    dictionary[activeLang]
+                        .msgColorUnavailable
+                );
+
+            }
+
         }
-    });
+    );
+
 });
 
-// Живой поиск + выпадающие результаты по названию
-const searchInput = document.getElementById("search-input");
-const searchResults = document.getElementById("search-results");
+// =========================================================================
+// ЖИВОЙ ПОИСК
+// =========================================================================
+
+const searchInput =
+    document.getElementById(
+        "search-input"
+    );
+
+const searchResults =
+    document.getElementById(
+        "search-results"
+    );
 
 function closeSearchResults() {
 
     if (searchResults) {
 
-        searchResults.classList.remove("active");
+        searchResults.classList.remove(
+            "active"
+        );
 
-        searchResults.innerHTML = "";
+        searchResults.innerHTML =
+            "";
+
     }
+
 }
 
 if (searchInput) {
 
-    searchInput.addEventListener("input", function() {
+    searchInput.addEventListener(
+        "input",
+        function() {
 
-        const query =
-            searchInput.value.toLowerCase().trim();
+            const query =
+                searchInput.value
+                    .toLowerCase()
+                    .trim();
 
-        const cards =
-            document.querySelectorAll(".product-card");
+            const cards =
+                document.querySelectorAll(
+                    ".product-card"
+                );
 
-        const matches = [];
+            const matches = [];
 
-        cards.forEach(card => {
+            cards.forEach(card => {
 
-            const title =
-                card.querySelector("h3").textContent.toLowerCase();
+                const title =
+                    card
+                        .querySelector("h3")
+                        .textContent
+                        .toLowerCase();
 
-            const isMatch =
-                title.includes(query);
+                const isMatch =
+                    title.includes(query);
 
-            card.style.display =
-                isMatch ? "" : "none";
+                card.style.display =
+                    isMatch
+                        ? ""
+                        : "none";
 
-            if (query && isMatch) {
-                matches.push(card);
-            }
-        });
+                if (
+                    query &&
+                    isMatch
+                ) {
 
-        if (!searchResults) return;
+                    matches.push(card);
 
-        if (!query) {
+                }
 
-            closeSearchResults();
+            });
 
-            return;
-        }
+            if (!searchResults)
+                return;
 
-        if (matches.length === 0) {
-
-            searchResults.innerHTML =
-                `<div class="search-no-results">
-                    ${dictionary[activeLang].msgNoResults}
-                </div>`;
-
-            searchResults.classList.add("active");
-
-            return;
-        }
-
-        searchResults.innerHTML = "";
-
-        matches.forEach(card => {
-
-            const name =
-                card.querySelector("h3").textContent;
-
-            const image =
-                card.querySelector(".product-image").src;
-
-            const item =
-                document.createElement("button");
-
-            item.type = "button";
-
-            item.className = "search-result-item";
-
-            item.innerHTML =
-                `<img src="${image}" alt="">
-                 <span>${escapeHTML(name)}</span>`;
-
-            item.addEventListener("click", () => {
-
-                document
-                    .querySelectorAll(".product-card")
-                    .forEach(c => c.style.display = "");
-
-                searchInput.value = "";
+            if (!query) {
 
                 closeSearchResults();
 
-                card.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center"
-                });
+                return;
 
-                card.classList.remove("search-highlight");
+            }
 
-                void card.offsetWidth;
+            if (matches.length === 0) {
 
-                card.classList.add("search-highlight");
+                searchResults.innerHTML =
+                    `<div class="search-no-results">
+                        ${dictionary[activeLang].msgNoResults}
+                    </div>`;
 
-                setTimeout(
-                    () => card.classList.remove("search-highlight"),
-                    1600
+                searchResults.classList.add(
+                    "active"
                 );
+
+                return;
+
+            }
+
+            searchResults.innerHTML =
+                "";
+
+            matches.forEach(card => {
+
+                const name =
+                    card
+                        .querySelector("h3")
+                        .textContent;
+
+                const image =
+                    card
+                        .querySelector(
+                            ".product-image"
+                        )
+                        .src;
+
+                const item =
+                    document.createElement(
+                        "button"
+                    );
+
+                item.type =
+                    "button";
+
+                item.className =
+                    "search-result-item";
+
+                item.innerHTML =
+                    `<img src="${image}" alt="">
+                     <span>
+                        ${escapeHTML(name)}
+                     </span>`;
+
+                item.addEventListener(
+                    "click",
+                    () => {
+
+                        document
+                            .querySelectorAll(
+                                ".product-card"
+                            )
+                            .forEach(
+                                c =>
+                                    c.style.display =
+                                        ""
+                            );
+
+                        searchInput.value =
+                            "";
+
+                        closeSearchResults();
+
+                        card.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center"
+                        });
+
+                        card.classList.remove(
+                            "search-highlight"
+                        );
+
+                        void card.offsetWidth;
+
+                        card.classList.add(
+                            "search-highlight"
+                        );
+
+                        setTimeout(
+                            () =>
+                                card.classList.remove(
+                                    "search-highlight"
+                                ),
+                            1600
+                        );
+
+                    }
+                );
+
+                searchResults.appendChild(
+                    item
+                );
+
             });
 
-            searchResults.appendChild(item);
-        });
+            searchResults.classList.add(
+                "active"
+            );
 
-        searchResults.classList.add("active");
-    });
-
-    document.addEventListener("click", (e) => {
-
-        if (!e.target.closest(".search-wrap")) {
-            closeSearchResults();
         }
-    });
+    );
+
+    document.addEventListener(
+        "click",
+        (e) => {
+
+            if (
+                !e.target.closest(
+                    ".search-wrap"
+                )
+            ) {
+
+                closeSearchResults();
+
+            }
+
+        }
+    );
+
 }
 
-// Словарь названий
+// =========================================================================
+// СЛОВАРЬ НАЗВАНИЙ
+// =========================================================================
+
 const productNames = {
 
     never: {
@@ -952,9 +1626,13 @@ const productNames = {
         en: "Shadow Ronin",
         et: "Varju Ronin"
     }
+
 };
 
-// Полный словарь мультиязычности
+// =========================================================================
+// ПОЛНЫЙ СЛОВАРЬ МУЛЬТИЯЗЫЧНОСТИ
+// =========================================================================
+
 const dictionary = {
 
     ru: {
@@ -971,6 +1649,9 @@ const dictionary = {
         cartTotal: "Итого: ",
         cartSize: "Размер: ",
 
+        collections:
+        "Коллекция",
+
         heroEyebrow:
             "Ателье принта — основано в Эстонии",
 
@@ -982,6 +1663,9 @@ const dictionary = {
 
         catalogTitle:
             "Каталог",
+
+        catalogEyebrow:
+            "Коллекция",
 
         lblColor:
             "Цвет",
@@ -1050,10 +1734,50 @@ const dictionary = {
             "❌ Этот цвет недоступен",
 
         msgNoResults:
-            "Ничего не найдено"
+            "Ничего не найдено",
+
+        mapSearchPlh:
+            "Введите город или улицу",
+
+        mapSearchBtn:
+            "Найти",
+
+        mapHint:
+            "Отметьте на карте примерный район или адрес — так проще выбрать ближайший автомат. Точный список автоматов — по кнопке выше.",
+
+        mapLinkOmniva:
+            "Автоматы Omniva на карте",
+
+        mapLinkDpd:
+            "Автоматы DPD на карте",
+
+        mapLinkSmartpost:
+            "Автоматы Smartpost на карте",
+
+        addressPlh:
+            "Таллинн, Kaubamaja Omniva...",
+
+        deliverySaved:
+            "✓ Данные доставки сохранены. Оплатите заказ:",
+
+        savingBtn:
+            "Сохранение...",
+
+        paymentSuccess:
+            "Успешно оплачено! ✔",
+
+        paypalErrorMsg:
+            "Ошибка PayPal ❌",
+
+        saveErrorMsg:
+            "Ошибка сохранения данных."
+
     },
 
     en: {
+
+        collections:
+        "Collection",
 
         navCatalog:
             "Catalog",
@@ -1096,6 +1820,9 @@ const dictionary = {
 
         catalogTitle:
             "Catalog",
+
+        catalogEyebrow:
+            "Collection",
 
         lblColor:
             "Color",
@@ -1164,10 +1891,50 @@ const dictionary = {
             "❌ This color is unavailable",
 
         msgNoResults:
-            "No results found"
+            "No results found",
+
+        mapSearchPlh:
+            "Enter a city or street",
+
+        mapSearchBtn:
+            "Search",
+
+        mapHint:
+            "Mark your general area or address on the map to help pick the nearest locker. For the exact list of lockers, use the button above.",
+
+        mapLinkOmniva:
+            "Omniva lockers on the map",
+
+        mapLinkDpd:
+            "DPD lockers on the map",
+
+        mapLinkSmartpost:
+            "Smartpost lockers on the map",
+
+        addressPlh:
+            "Tallinn, Kaubamaja Omniva...",
+
+        deliverySaved:
+            "✓ Delivery details saved. Please complete payment:",
+
+        savingBtn:
+            "Saving...",
+
+        paymentSuccess:
+            "Payment successful! ✔",
+
+        paypalErrorMsg:
+            "PayPal Error ❌",
+
+        saveErrorMsg:
+            "Error saving data."
+
     },
 
     et: {
+
+        collections:
+        "Kollektsioon",
 
         navCatalog:
             "Kataloog",
@@ -1210,6 +1977,9 @@ const dictionary = {
 
         catalogTitle:
             "Kataloog",
+
+        catalogEyebrow:
+            "Kollektsioon",
 
         lblColor:
             "Värv",
@@ -1278,66 +2048,135 @@ const dictionary = {
             "❌ See värv pole saadaval",
 
         msgNoResults:
-            "Tulemusi ei leitud"
+            "Tulemusi ei leitud",
+
+        mapSearchPlh:
+            "Sisesta linn või tänav",
+
+        mapSearchBtn:
+            "Otsi",
+
+        mapHint:
+            "Märgi kaardile oma piirkond või aadress — nii on lihtsam valida lähim automaat. Täpne automaatide nimekiri on ülal oleva nupu taga.",
+
+        mapLinkOmniva:
+            "Omniva automaadid kaardil",
+
+        mapLinkDpd:
+            "DPD automaadid kaardil",
+
+        mapLinkSmartpost:
+            "Smartposti automaadid kaardil",
+
+        addressPlh:
+            "Tallinn, Kaubamaja Omniva...",
+
+        deliverySaved:
+            "✓ Tarneandmed salvestatud. Palun tasu:",
+
+        savingBtn:
+            "Salvestamine...",
+
+        paymentSuccess:
+            "Makse õnnestus! ✔",
+
+        paypalErrorMsg:
+            "PayPali viga ❌",
+
+        saveErrorMsg:
+            "Andmete salvestamise viga."
+
     }
+
 };
 
 let activeLang = "ru";
 
+// =========================================================================
+// ПЕРЕВОД КОРЗИНЫ
+// =========================================================================
+
 function applyCartTranslation() {
 
-    const d = dictionary[activeLang];
+    const d =
+        dictionary[activeLang];
 
     const cartTitleEl =
-        document.getElementById("lang-cart-title");
+        document.getElementById(
+            "lang-cart-title"
+        );
 
     const cartEmptyEl =
-        document.getElementById("lang-cart-empty");
+        document.getElementById(
+            "lang-cart-empty"
+        );
 
     if (cartTitleEl) {
-        cartTitleEl.textContent = d.cartTitle;
+        cartTitleEl.textContent =
+            d.cartTitle;
     }
 
     if (cartEmptyEl) {
-        cartEmptyEl.textContent = d.cartEmpty;
+        cartEmptyEl.textContent =
+            d.cartEmpty;
     }
 
     const totalEl =
-        document.querySelector(".cart-total");
+        document.querySelector(
+            ".cart-total"
+        );
 
-    if (totalEl && cart.length > 0) {
+    if (
+        totalEl &&
+        cart.length > 0
+    ) {
 
         let totalSum = 0;
 
         cart.forEach(item => {
-            totalSum += parseFloat(item.price);
+
+            totalSum +=
+                parseFloat(item.price);
+
         });
 
         totalEl.textContent =
-            d.cartTotal + totalSum + " €";
+            d.cartTotal +
+            totalSum +
+            " €";
 
     } else if (totalEl) {
 
         totalEl.textContent =
-            d.cartTotal + "0 €";
+            d.cartTotal +
+            "0 €";
+
     }
 
     document
-        .querySelectorAll(".cart-product")
+        .querySelectorAll(
+            ".cart-product"
+        )
         .forEach(cartProd => {
 
             const nameSpan =
-                cartProd.querySelector(".cart-info span");
+                cartProd.querySelector(
+                    ".cart-info span"
+                );
 
             const sizeSmall =
-                cartProd.querySelector(".cart-info small");
+                cartProd.querySelector(
+                    ".cart-info small"
+                );
 
             if (nameSpan) {
 
                 let origName =
                     nameSpan.textContent;
 
-                for (let id in productNames) {
+                for (
+                    let id in productNames
+                ) {
 
                     if (
                         productNames[id].ru === origName ||
@@ -1349,8 +2188,11 @@ function applyCartTranslation() {
                             productNames[id][activeLang];
 
                         break;
+
                     }
+
                 }
+
             }
 
             if (sizeSmall) {
@@ -1363,206 +2205,339 @@ function applyCartTranslation() {
                         .trim();
 
                 sizeSmall.textContent =
-                    d.cartSize + currentSize;
+                    d.cartSize +
+                    currentSize;
+
             }
+
         });
+
 }
 
+// =========================================================================
+// СМЕНА ЯЗЫКА
+// =========================================================================
+
 const langSelect =
-    document.getElementById("language-select");
+    document.getElementById(
+        "language-select"
+    );
 
 if (langSelect) {
 
-    langSelect.addEventListener("change", (e) => {
+    langSelect.addEventListener(
+        "change",
+        (e) => {
 
-        activeLang = e.target.value;
+            activeLang =
+                e.target.value;
 
-        const d = dictionary[activeLang];
+            const d =
+                dictionary[activeLang];
 
-        document.getElementById(
-            "lang-nav-catalog"
-        ).textContent = d.navCatalog;
+            document.getElementById(
+                "lang-nav-catalog"
+            ).textContent =
+                d.navCatalog;
 
-        document.getElementById(
-            "lang-nav-collections"
-        ).textContent = d.navCollections;
+            document.getElementById(
+                "lang-nav-collections"
+            ).textContent =
+                d.navCollections;
 
-        document.getElementById(
-            "lang-nav-contacts"
-        ).textContent = d.navContacts;
+            document.getElementById(
+                "lang-nav-contacts"
+            ).textContent =
+                d.navContacts;
 
-        document.getElementById(
-            "search-input"
-        ).placeholder = d.searchPlh;
+            document.getElementById(
+                "search-input"
+            ).placeholder =
+                d.searchPlh;
 
-        // Перевод верхней надписи
-        const heroEyebrowEl =
-            document.getElementById("lang-hero-eyebrow");
+            const heroEyebrowEl =
+                document.getElementById(
+                    "lang-hero-eyebrow"
+                );
 
-        if (heroEyebrowEl) {
-            heroEyebrowEl.textContent =
-                d.heroEyebrow;
+            if (heroEyebrowEl) {
+
+                heroEyebrowEl.textContent =
+                    d.heroEyebrow;
+
+            }
+
+            document.getElementById(
+                "lang-hero-subtitle"
+            ).innerHTML =
+                d.heroSubtitle;
+
+            document.getElementById(
+                "lang-hero-btn"
+            ).textContent =
+                d.heroBtn;
+
+            document.getElementById(
+                "lang-catalog-title"
+            ).textContent =
+                d.catalogTitle;
+
+            const catalogEyebrowEl =
+                document.getElementById(
+                    "lang-catalog-eyebrow"
+                );
+
+            if (catalogEyebrowEl) {
+
+                catalogEyebrowEl.textContent =
+                    d.catalogEyebrow;
+
+            }
+
+            document
+                .querySelectorAll(
+                    ".product-card"
+                )
+                .forEach(card => {
+
+                    const pId =
+                        card.getAttribute(
+                            "data-product-id"
+                        );
+
+                    if (
+                        pId &&
+                        productNames[pId]
+                    ) {
+
+                        card.querySelector(
+                            ".lang-p-title"
+                        ).textContent =
+                            productNames[pId][
+                                activeLang
+                            ];
+
+                    }
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-label-color"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.lblColor;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-label-size"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.lblSize;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-label-fit"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.lblFit;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-color-black"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.clrBlack;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-color-white"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.clrWhite;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-fit-slim"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.fitSlim;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-fit-regular"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.fitRegular;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-fit-relaxed"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.fitRelaxed;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-fit-loose"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.fitLoose;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-fit-oversize"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.fitOversize;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-btn-add"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.btnAdd;
+
+                });
+
+            document
+                .querySelectorAll(
+                    ".lang-btn-buy"
+                )
+                .forEach(el => {
+
+                    el.textContent =
+                        d.btnBuy;
+
+                });
+
+            const scrollCueEl =
+                document.getElementById(
+                    "lang-scroll-cue"
+                );
+
+            if (scrollCueEl) {
+
+                scrollCueEl.textContent =
+                    d.scrollCue;
+
+            }
+
+            document.getElementById(
+                "lang-cart-checkout"
+            ).textContent =
+                d.cartCheckout;
+
+            document.getElementById(
+                "lang-cart-clear"
+            ).textContent =
+                d.cartClear;
+
+            applyCartTranslation();
+
+            document.getElementById(
+                "lang-footer-about"
+            ).textContent =
+                d.ftAbout;
+
+            document.getElementById(
+                "lang-footer-contacts-title"
+            ).textContent =
+                d.ftContacts;
+
+            document.getElementById(
+                "lang-footer-socials"
+            ).textContent =
+                d.ftSocials;
+
         }
+    );
 
-        document.getElementById(
-            "lang-hero-subtitle"
-        ).innerHTML = d.heroSubtitle;
-
-        document.getElementById(
-            "lang-hero-btn"
-        ).textContent = d.heroBtn;
-
-        document.getElementById(
-            "lang-catalog-title"
-        ).textContent = d.catalogTitle;
-
-        document
-            .querySelectorAll(".product-card")
-            .forEach(card => {
-
-                const pId =
-                    card.getAttribute("data-product-id");
-
-                if (
-                    pId &&
-                    productNames[pId]
-                ) {
-
-                    card.querySelector(
-                        ".lang-p-title"
-                    ).textContent =
-                        productNames[pId][activeLang];
-                }
-            });
-
-        document
-            .querySelectorAll(".lang-label-color")
-            .forEach(el => {
-                el.textContent = d.lblColor;
-            });
-
-        document
-            .querySelectorAll(".lang-label-size")
-            .forEach(el => {
-                el.textContent = d.lblSize;
-            });
-
-        document
-            .querySelectorAll(".lang-label-fit")
-            .forEach(el => {
-                el.textContent = d.lblFit;
-            });
-
-        document
-            .querySelectorAll(".lang-color-black")
-            .forEach(el => {
-                el.textContent = d.clrBlack;
-            });
-
-        document
-            .querySelectorAll(".lang-color-white")
-            .forEach(el => {
-                el.textContent = d.clrWhite;
-            });
-
-        document
-            .querySelectorAll(".lang-fit-slim")
-            .forEach(el => {
-                el.textContent = d.fitSlim;
-            });
-
-        document
-            .querySelectorAll(".lang-fit-regular")
-            .forEach(el => {
-                el.textContent = d.fitRegular;
-            });
-
-        document
-            .querySelectorAll(".lang-fit-relaxed")
-            .forEach(el => {
-                el.textContent = d.fitRelaxed;
-            });
-
-        document
-            .querySelectorAll(".lang-fit-loose")
-            .forEach(el => {
-                el.textContent = d.fitLoose;
-            });
-
-        document
-            .querySelectorAll(".lang-fit-oversize")
-            .forEach(el => {
-                el.textContent = d.fitOversize;
-            });
-
-        document
-            .querySelectorAll(".lang-btn-add")
-            .forEach(el => {
-                el.textContent = d.btnAdd;
-            });
-
-        document
-            .querySelectorAll(".lang-btn-buy")
-            .forEach(el => {
-                el.textContent = d.btnBuy;
-            });
-
-        const scrollCueEl =
-            document.getElementById("lang-scroll-cue");
-
-        if (scrollCueEl) {
-            scrollCueEl.textContent =
-                d.scrollCue;
-        }
-
-        document.getElementById(
-            "lang-cart-checkout"
-        ).textContent = d.cartCheckout;
-
-        document.getElementById(
-            "lang-cart-clear"
-        ).textContent = d.cartClear;
-
-        applyCartTranslation();
-
-        document.getElementById(
-            "lang-footer-about"
-        ).textContent = d.ftAbout;
-
-        document.getElementById(
-            "lang-footer-contacts-title"
-        ).textContent = d.ftContacts;
-
-        document.getElementById(
-            "lang-footer-socials"
-        ).textContent = d.ftSocials;
-    });
 }
+
+// =========================================================================
+// BUY NOW
+// =========================================================================
 
 document
     .querySelectorAll(".buy-btn")
     .forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            const card =
-                button.closest(".product-card");
+                const card =
+                    button.closest(
+                        ".product-card"
+                    );
 
-            const prodId =
-                card.getAttribute("data-product-id");
+                const prodId =
+                    card.getAttribute(
+                        "data-product-id"
+                    );
 
-            if (prodId) {
-                buyNow(prodId);
+                if (prodId) {
+
+                    buyNow(prodId);
+
+                }
+
             }
-        });
+        );
+
     });
 
 // =========================================================================
-// ФИКСИРОВАННАЯ ШАПКА — фон появляется при прокрутке
+// ФИКСИРОВАННАЯ ШАПКА
 // =========================================================================
 
 const siteNav =
-    document.getElementById("siteNav");
+    document.getElementById(
+        "siteNav"
+    );
 
 if (siteNav) {
 
@@ -1570,12 +2545,18 @@ if (siteNav) {
 
         if (window.scrollY > 40) {
 
-            siteNav.classList.add("scrolled");
+            siteNav.classList.add(
+                "scrolled"
+            );
 
         } else {
 
-            siteNav.classList.remove("scrolled");
+            siteNav.classList.remove(
+                "scrolled"
+            );
+
         }
+
     };
 
     toggleNav();
@@ -1583,8 +2564,11 @@ if (siteNav) {
     window.addEventListener(
         "scroll",
         toggleNav,
-        { passive: true }
+        {
+            passive: true
+        }
     );
+
 }
 
 // =========================================================================
@@ -1592,7 +2576,9 @@ if (siteNav) {
 // =========================================================================
 
 const revealItems =
-    document.querySelectorAll(".reveal");
+    document.querySelectorAll(
+        ".reveal"
+    );
 
 if (
     "IntersectionObserver" in window &&
@@ -1605,7 +2591,9 @@ if (
 
                 entries.forEach(entry => {
 
-                    if (entry.isIntersecting) {
+                    if (
+                        entry.isIntersecting
+                    ) {
 
                         entry.target.classList.add(
                             "in-view"
@@ -1614,7 +2602,9 @@ if (
                         revealObserver.unobserve(
                             entry.target
                         );
+
                     }
+
                 });
 
             },
@@ -1630,6 +2620,9 @@ if (
 } else {
 
     revealItems.forEach(item =>
-        item.classList.add("in-view")
+        item.classList.add(
+            "in-view"
+        )
     );
+
 }

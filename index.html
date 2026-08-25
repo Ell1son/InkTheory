@@ -9,8 +9,46 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Jura:wght@300..700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
+
+    <!-- Leaflet — интерактивная карта для выбора адреса/района доставки (бесплатно, без API-ключа) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+    <!-- EmailJS — отправка авто-письма с подтверждением заказа на почту клиента.
+         ВАЖНО: чтобы письма реально отправлялись, нужно завершить настройку —
+         см. комментарий "НАСТРОЙКА EMAILJS" в начале файла script.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+
     <script src="script.js" defer></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AVdKma7E9aNHm6gF-HVuFn_Rjec9d2-NnU4Jur6_lv2ygotfz2mHL4C8Efju1PeZSCrZlKf5Laa6yHff&currency=EUR"></script>
+
+    <style>
+        /* Фото человека в галерее показывается целиком,
+           без жёсткого crop. */
+        .product-image-wrap .gallery-model-image {
+            object-fit: contain !important;
+            object-position: center center !important;
+            background: #0e0d10;
+        }
+
+        .product-image-wrap .gallery-model-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: #0e0d10;
+            color: #8d8890;
+            font-size: 13px;
+            letter-spacing: .04em;
+            text-align: center;
+        }
+
+        .product-image-wrap .gallery-model-placeholder::after {
+            content: 'PHOTO OF MODEL';
+        }
+    </style>
+
 </head>
 <body>
 
@@ -87,7 +125,7 @@
     <section class="catalog" id="catalog">
 
         <div class="section-head reveal">
-            <span class="eyebrow">Коллекция</span>
+            <span class="eyebrow" id="collections">Коллекция</span>
             <h2 class="catalog-title" id="lang-catalog-title">Каталог</h2>
             <svg class="ink-divider" viewBox="0 0 300 16" preserveAspectRatio="none" aria-hidden="true">
                 <path d="M2 8 C 60 -2, 120 18, 180 8 S 260 -2, 298 8" />
@@ -102,7 +140,7 @@
                         src="images/Never Give Up.png"
                         alt="Never Give Up"
                         class="product-image"
-                        data-black="images/never.png"
+                        data-black="images/Never Give Up.png"
                         data-white="">
                 </div>
 
@@ -205,7 +243,8 @@
                         alt="Summer Vibes"
                         class="product-image"
                         data-black="images/Summer Vibes Black.png"
-                        data-white="images/Summer Vibes White.png">
+                        data-white="images/Summer Vibes White.png"
+                    >
                 </div>
 
                 <div class="product-body">

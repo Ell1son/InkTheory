@@ -701,6 +701,7 @@ a {
     inset: 0;
     background: linear-gradient(180deg, transparent 60%, rgba(11,10,13,0.55) 100%);
     pointer-events: none;
+    z-index: 2;
 }
 
 .product-body {
@@ -1030,4 +1031,96 @@ a {
 #paypal-fast-modal textarea,
 #paypal-fast-modal select {
     font-family: 'Jura', sans-serif;
+}
+
+/* =========================================================================
+   КАРТА ВЫБОРА МЕСТА ДОСТАВКИ (внутри модального окна оформления заказа)
+   ========================================================================= */
+
+.delivery-map-block {
+    margin-top: 4px;
+}
+
+.delivery-map-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.delivery-map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(201,162,75,0.35);
+    color: #e6c583;
+    background: rgba(201,162,75,0.08);
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.delivery-map-link:hover {
+    background: rgba(201,162,75,0.18);
+    transform: translateY(-1px);
+}
+
+.delivery-map-search {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.delivery-map-search input {
+    flex: 1;
+    padding: 9px 10px;
+    background: #1d1922;
+    border: 1px solid rgba(201,162,75,0.2);
+    color: #f2ede2;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.delivery-map-search button {
+    padding: 0 14px;
+    border: 1px solid rgba(201,162,75,0.35);
+    background: rgba(201,162,75,0.12);
+    color: #e6c583;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.delivery-map-search button:hover {
+    background: rgba(201,162,75,0.22);
+}
+
+.delivery-map-canvas {
+    width: 100%;
+    height: 190px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(201,162,75,0.2);
+    background: #1d1922;
+}
+
+.delivery-map-hint {
+    font-size: 11.5px;
+    color: #948c7f;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+/* тёмная тема для попапов Leaflet, чтобы они не выбивались из дизайна */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: #17141b;
+    color: #f2ede2;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+    color: #948c7f;
 }
