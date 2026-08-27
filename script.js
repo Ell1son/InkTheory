@@ -859,179 +859,449 @@ function buyNow(prodId) {
         });
 
     document
-        .getElementById('fastOrderForm')
-        .addEventListener('submit', function(e) {
+    .getElementById('fastOrderForm')
+    .addEventListener('submit', async function(e) {
 
-            e.preventDefault();
+        e.preventDefault();
 
-            const form = this;
+        const form = this;
+        const submitBtn =
+            document.getElementById('fastSubmitBtn');
 
-            const submitBtn =
-                document.getElementById('fastSubmitBtn');
+        const paypalContainer =
+            document.getElementById('paypal-fast-container');
 
-            const finalPrice =
-                recalculate();
+        const paypalButtons =
+            document.getElementById('paypal-buttons-inside');
 
-            const customerEmail =
-                document
-                    .getElementById('fastCustomerEmail')
-                    .value;
+        const finalPrice =
+            recalculate();
 
-            const customerName =
-                form
-                    .querySelector('[name="customer_name"]')
-                    .value;
+        const customerEmail =
+            document
+                .getElementById('fastCustomerEmail')
+                .value
+                .trim();
 
-            submitBtn.disabled = true;
-            submitBtn.innerText = d.savingBtn;
+        const customerName =
+            form
+                .querySelector('[name="customer_name"]')
+                .value
+                .trim();
 
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-                .then(() => {
+        // Проверяем, что PayPal SDK загрузился
+        if (!window.paypal || !window.paypal.Buttons) {
 
-                    form.style.display = 'none';
+            console.error('PayPal SDK не загружен.');
 
-                    document
-                        .getElementById('paypal-fast-container')
-                        .style.display = 'block';
+            showMessage(
+                d.paypalErrorMsg ||
+                'PayPal Error ❌'
+            );
 
-                    // =====================================================
-                    // ВАЖНО:
-                    // EmailJS ЗДЕСЬ БОЛЬШЕ НЕ ВЫЗЫВАЕТСЯ.
-                    //
-                    // Письмо клиенту отправится только после успешной
-                    // оплаты PayPal — внутри onApprove ниже.
-                    // =====================================================
+            return;
+        }
 
-                    if (
-                        window.paypal &&
-                        window.paypal.Buttons
-                    ) {
+        submitBtn.disabled = true;
 
-                        window.paypal.Buttons({
+        submitBtn.innerText =
+            d.savingBtn ||
+            'Saving...';
 
-                            style: {
-                                layout: 'vertical',
-                                color: 'gold',
-                                shape: 'rect',
-                                label: 'buynow'
-                            },
+        /*
+         * ВАЖНО:
+         * До успешной оплаты PayPal заказ НЕ отправляем.
+         */
 
-                            createOrder:
-                                function(data, actions) {
+        form.style.display = 'none';
 
-                                    return actions.order.create({
+        paypalContainer.style.display =
+            'block';
 
-                                        purchase_units: [{
+        paypalButtons.innerHTML = '';
 
-                                            invoice_id:
-                                                orderId,
+        /*
+         * Подготавливаем данные заказа.
+         * Они будут отправлены продавцу ТОЛЬКО
+         * после успешного capture.
+         */
 
-                                            description:
-                                                `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color}/${fitText})`,
+        const orderData =
+            new FormData(form);
 
-                                            amount: {
-                                                currency_code: "EUR",
-                                                value:
-                                                    finalPrice.toFixed(2)
+        orderData.set(
+            'total_price',
+            `${finalPrice.toFixed(2)} €`
+        );
+
+        try {
+
+            await window.paypal.Buttons({
+
+                style: {
+                    layout: 'vertical',
+                    color: 'gold',
+                    shape: 'rect',
+                    label: 'buynow'
+                },
+
+                /*
+                 * СОЗДАНИЕ PAYPAL ORDER
+                 */
+
+                createOrder:
+                    function(data, actions) {
+
+                        return actions.order.create({
+
+                            intent: 'CAPTURE',
+
+                            purchase_units: [{
+
+                                invoice_id:
+                                    orderId,
+
+                                description:
+                                    `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color}/${fitText})`,
+
+                                amount: {
+
+                                    currency_code: 'EUR',
+
+                                    value:
+                                        finalPrice.toFixed(2)
+
+                                }
+
+                            }]
+
+                        });
+
+                    },
+
+                /*
+                 * ПОКУПАТЕЛЬ ПОДТВЕРДИЛ ОПЛАТУ
+                 */
+
+                onApprove:
+                    async function(data, actions) {
+
+                        try {
+
+                            /*
+                             * ЗДЕСЬ ПРОИСХОДИТ ФАКТИЧЕСКИЙ CAPTURE
+                             */
+
+                            const details =
+                                await actions.order.capture();
+
+                            console.log(
+                                'PayPal capture response:',
+                                details
+                            );
+
+                            /*
+                             * Получаем информацию о capture
+                             */
+
+                            const capture =
+                                details
+                                    ?.purchase_units?.[0]
+                                    ?.payments?.captures?.[0];
+
+                            const captureStatus =
+                                capture?.status;
+
+                            const captureId =
+                                capture?.id || '';
+
+                            console.log(
+                                'PayPal capture status:',
+                                captureStatus
+                            );
+
+                            console.log(
+                                'PayPal capture ID:',
+                                captureId
+                            );
+
+                            /*
+                             * ДЕНЬГИ СЧИТАЕМ ПОЛУЧЕННЫМИ
+                             * ТОЛЬКО ЕСЛИ PAYPAL ВЕРНУЛ COMPLETED
+                             */
+
+                            if (
+                                captureStatus !==
+                                'COMPLETED'
+                            ) {
+
+                                throw new Error(
+                                    `PayPal capture status: ${
+                                        captureStatus ||
+                                        'UNKNOWN'
+                                    }`
+                                );
+
+                            }
+
+                            /*
+                             * Сохраняем информацию
+                             * об успешной оплате
+                             */
+
+                            orderData.set(
+                                'payment_status',
+                                captureStatus
+                            );
+
+                            orderData.set(
+                                'paypal_order_id',
+                                data.orderID || ''
+                            );
+
+                            orderData.set(
+                                'paypal_capture_id',
+                                captureId
+                            );
+
+                            /*
+                             * ТЕПЕРЬ, И ТОЛЬКО ТЕПЕРЬ,
+                             * отправляем заказ продавцу.
+                             */
+
+                            let sellerEmailSent =
+                                false;
+
+                            try {
+
+                                const response =
+                                    await fetch(
+                                        form.action,
+                                        {
+                                            method: 'POST',
+
+                                            body:
+                                                orderData,
+
+                                            headers: {
+                                                'Accept':
+                                                    'application/json'
                                             }
+                                        }
+                                    );
 
-                                        }]
+                                sellerEmailSent =
+                                    response.ok;
 
-                                    });
+                                if (!response.ok) {
 
-                                },
-
-                            // =================================================
-                            // ОПЛАТА УСПЕШНО ЗАВЕРШЕНА
-                            // =================================================
-                            onApprove:
-                                function(data, actions) {
-
-                                    return actions
-                                        .order
-                                        .capture()
-                                        .then(function(details) {
-
-                                            // =================================
-                                            // EMAILJS ОТПРАВЛЯЕТ ПИСЬМО
-                                            // ТОЛЬКО ПОСЛЕ УСПЕШНОЙ ОПЛАТЫ
-                                            // =================================
-
-                                            sendCustomerConfirmationEmail({
-
-                                                to_email:
-                                                    customerEmail,
-
-                                                customer_name:
-                                                    customerName,
-
-                                                order_id:
-                                                    orderId,
-
-                                                product:
-                                                    `${product.name} (${selection.size}/${selection.color}/${fitText})`,
-
-                                                total_price:
-                                                    `${finalPrice.toFixed(2)} €`
-
-                                            });
-
-                                            showMessage(
-                                                d.paymentSuccess
-                                            );
-
-                                            payModal.style.display =
-                                                'none';
-
-                                            document.body.style.overflow =
-                                                '';
-
-                                        });
-
-                                },
-
-                            onError:
-                                function(err) {
-
-                                    console.error(err);
-
-                                    showMessage(
-                                        d.paypalErrorMsg
+                                    console.error(
+                                        'FormSubmit error:',
+                                        response.status,
+                                        await response
+                                            .text()
+                                            .catch(() => '')
                                     );
 
                                 }
 
-                        }).render(
-                            '#paypal-buttons-inside'
+                            } catch (sellerError) {
+
+                                console.error(
+                                    'Не удалось отправить заказ продавцу:',
+                                    sellerError
+                                );
+
+                            }
+
+                            /*
+                             * Письмо покупателю отправляем
+                             * только после COMPLETED.
+                             */
+
+                            sendCustomerConfirmationEmail({
+
+                                to_email:
+                                    customerEmail,
+
+                                customer_name:
+                                    customerName,
+
+                                order_id:
+                                    orderId,
+
+                                product:
+                                    `${product.name} (${selection.size}/${selection.color}/${fitText})`,
+
+                                total_price:
+                                    `${finalPrice.toFixed(2)} €`,
+
+                                payment_status:
+                                    captureStatus,
+
+                                paypal_order_id:
+                                    data.orderID || '',
+
+                                paypal_capture_id:
+                                    captureId
+
+                            });
+
+                            /*
+                             * Показываем успешную оплату
+                             */
+
+                            showMessage(
+                                d.paymentSuccess ||
+                                'Payment successful! ✔'
+                            );
+
+                            if (!sellerEmailSent) {
+
+                                console.warn(
+                                    'Оплата прошла, но письмо продавцу не было подтверждено FormSubmit.'
+                                );
+
+                            }
+
+                            payModal.style.display =
+                                'none';
+
+                            document.body.style.overflow =
+                                '';
+
+                        } catch (captureError) {
+
+                            console.error(
+                                'PayPal capture error:',
+                                captureError
+                            );
+
+                            /*
+                             * Если capture НЕ COMPLETED,
+                             * заказ продавцу НЕ отправляем.
+                             */
+
+                            form.style.display =
+                                'flex';
+
+                            paypalContainer.style.display =
+                                'none';
+
+                            submitBtn.disabled =
+                                false;
+
+                            submitBtn.innerText =
+                                txtBtnSave;
+
+                            showMessage(
+                                `${
+                                    d.paypalErrorMsg ||
+                                    'PayPal Error ❌'
+                                } ${
+                                    captureError.message ||
+                                    ''
+                                }`
+                            );
+
+                        }
+
+                    },
+
+                /*
+                 * ПОКУПАТЕЛЬ ОТМЕНИЛ ОПЛАТУ
+                 */
+
+                onCancel:
+                    function(data) {
+
+                        console.warn(
+                            'PayPal payment cancelled:',
+                            data
+                        );
+
+                        form.style.display =
+                            'flex';
+
+                        paypalContainer.style.display =
+                            'none';
+
+                        submitBtn.disabled =
+                            false;
+
+                        submitBtn.innerText =
+                            txtBtnSave;
+
+                        showMessage(
+                            d.paypalErrorMsg ||
+                            'Оплата отменена'
+                        );
+
+                    },
+
+                /*
+                 * ОШИБКА PAYPAL
+                 */
+
+                onError:
+                    function(err) {
+
+                        console.error(
+                            'PayPal Buttons error:',
+                            err
+                        );
+
+                        form.style.display =
+                            'flex';
+
+                        paypalContainer.style.display =
+                            'none';
+
+                        submitBtn.disabled =
+                            false;
+
+                        submitBtn.innerText =
+                            txtBtnSave;
+
+                        showMessage(
+                            d.paypalErrorMsg ||
+                            'PayPal Error ❌'
                         );
 
                     }
 
-                })
-                .catch(() => {
+            }).render(
+                '#paypal-buttons-inside'
+            );
 
-                    alert(
-                        d.saveErrorMsg
-                    );
+        } catch (renderError) {
 
-                    submitBtn.disabled =
-                        false;
+            console.error(
+                'PayPal render error:',
+                renderError
+            );
 
-                    submitBtn.innerText =
-                        txtBtnSave;
+            form.style.display =
+                'flex';
 
-                });
+            paypalContainer.style.display =
+                'none';
 
-        });
+            submitBtn.disabled =
+                false;
 
+            submitBtn.innerText =
+                txtBtnSave;
+
+            showMessage(
+                d.paypalErrorMsg ||
+                'PayPal Error ❌'
+            );
+
+        }
+
+    });
 }
-
 // =========================================================================
 // ПЕРЕХОД К ОПЛАТЕ ИЗ КОРЗИНЫ
 // =========================================================================
