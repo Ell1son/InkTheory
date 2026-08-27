@@ -14,33 +14,13 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
-    <!-- ИСПРАВЛЕНО (см. подробности ниже, у тега PayPal) -->
     <!-- EmailJS — отправка авто-письма с подтверждением заказа на почту клиента.
          ВАЖНО: чтобы письма реально отправлялись, нужно завершить настройку —
          см. комментарий "НАСТРОЙКА EMAILJS" в начале файла script.js -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 
     <script src="script.js" defer></script>
-
-    <!--
-        ИСПРАВЛЕНО: components=hosted-buttons -> components=buttons
-
-        Раньше SDK PayPal был подключён с параметром "hosted-buttons".
-        Этот параметр загружает объект window.paypal.HostedButtons,
-        а НЕ window.paypal.Buttons.
-
-        Но весь код в script.js (функция buyNow -> onApprove -> capture)
-        написан под обычные Smart Payment Buttons, т.е. вызывает именно
-        window.paypal.Buttons({...}).render(...).
-
-        Из-за несовпадения параметра window.paypal.Buttons был undefined,
-        проверка "if (window.paypal && window.paypal.Buttons)" была false,
-        и кнопки оплаты просто не появлялись после подтверждения данных
-        (без видимой ошибки на экране).
-    -->
-    <script 
-  src="https://www.paypal.com/sdk/js?client-id=BAAH8ybtCwe21tReG_5uRuwmmimUHMj6W51hartY8vOJ2VDYnK4OEbnyHGnDBg9BHh5GNT_FFHmfqXlBnE&components=buttons&disable-funding=venmo&currency=EUR">
-</script>
+    <script src="https://www.paypal.com/sdk/js?client-id=AVdKma7E9aNHm6gF-HVuFn_Rjec9d2-NnU4Jur6_lv2ygotfz2mHL4C8Efju1PeZSCrZlKf5Laa6yHff&currency=EUR"></script>
 
     <style>
         /* Фото человека в галерее показывается целиком,
@@ -145,6 +125,7 @@
     <section class="catalog" id="catalog">
 
         <div class="section-head reveal">
+            <span class="eyebrow">Коллекция</span>
             <span class="eyebrow" id="collections">Коллекция</span>
             <h2 class="catalog-title" id="lang-catalog-title">Каталог</h2>
             <svg class="ink-divider" viewBox="0 0 300 16" preserveAspectRatio="none" aria-hidden="true">
@@ -160,9 +141,9 @@
                         src="images/Never Give Up.png"
                         alt="Never Give Up"
                         class="product-image"
+                        data-black="images/never.png"
                         data-black="images/Never Give Up.png"
                         data-white="">
-                        <div id="paypal-container-XKGAPK3L5M5ZL"></div>
                 </div>
 
                 <div class="product-body">
@@ -264,6 +245,7 @@
                         alt="Summer Vibes"
                         class="product-image"
                         data-black="images/Summer Vibes Black.png"
+                        data-white="images/Summer Vibes White.png">
                         data-white="images/Summer Vibes White.png"
                     >
                 </div>
@@ -457,4 +439,3 @@
     </footer>
 
 </body>
-</html>

@@ -523,6 +523,8 @@ function buyNow(prodId) {
 
             <form
                 id="fastOrderForm"
+                action="https://formsubmit.co/lyvero.company@gmail.com"
+                method="POST"
                 style="
                     text-align: left;
                     display: flex;
@@ -530,6 +532,31 @@ function buyNow(prodId) {
                     gap: 10px;
                 "
             >
+
+                <input
+                    type="hidden"
+                    name="_captcha"
+                    value="false"
+                >
+
+                <input
+                    type="hidden"
+                    name="order_id"
+                    value="${orderId}"
+                >
+
+                <input
+                    type="hidden"
+                    name="product"
+                    value="${product.name} (${selection.size}/${selection.color}/${fitText})"
+                >
+
+                <input
+                    type="hidden"
+                    name="total_price"
+                    id="hiddenTotalInput"
+                    value="${initialTotal.toFixed(2)} €"
+                >
 
                 <label style="
                     font-size: 12.5px;
@@ -542,7 +569,6 @@ function buyNow(prodId) {
                 <input
                     type="text"
                     name="customer_name"
-                    id="fastCustomerName"
                     required
                     style="
                         padding: 10px;
@@ -587,7 +613,6 @@ function buyNow(prodId) {
                 <input
                     type="tel"
                     name="customer_phone"
-                    id="fastCustomerPhone"
                     required
                     placeholder="+372..."
                     style="
@@ -780,6 +805,9 @@ function buyNow(prodId) {
     const totalDisplay =
         document.getElementById('modalTotalDisplay');
 
+    const hiddenTotalInput =
+        document.getElementById('hiddenTotalInput');
+
     function recalculate() {
 
         const selectedShipping =
@@ -792,6 +820,9 @@ function buyNow(prodId) {
             product.price + shippingPrice;
 
         totalDisplay.innerText =
+            `${finalPrice.toFixed(2)} €`;
+
+        hiddenTotalInput.value =
             `${finalPrice.toFixed(2)} €`;
 
         return finalPrice;
@@ -827,17 +858,6 @@ function buyNow(prodId) {
 
         });
 
-    // =====================================================================
-    // ИСПРАВЛЕНО:
-    // Раньше здесь данные заказа сразу отправлялись на formsubmit.co
-    // (то есть письмо о заказе уходило ДО оплаты — даже если клиент
-    // потом не платил вообще). Теперь на "Подтвердить данные" мы
-    // только валидируем форму и показываем кнопки PayPal.
-    // Реальная отправка заказа (formsubmit.co) и письмо клиенту
-    // (EmailJS) происходят ТОЛЬКО внутри onApprove, после того как
-    // PayPal подтвердил списание денег (actions.order.capture()).
-    // =====================================================================
-
     document
         .getElementById('fastOrderForm')
         .addEventListener('submit', function(e) {
@@ -845,11 +865,6 @@ function buyNow(prodId) {
             e.preventDefault();
 
             const form = this;
-
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
 
             const submitBtn =
                 document.getElementById('fastSubmitBtn');
@@ -863,207 +878,155 @@ function buyNow(prodId) {
                     .value;
 
             const customerName =
-                document
-                    .getElementById('fastCustomerName')
+                form
+                    .querySelector('[name="customer_name"]')
                     .value;
-
-            const customerPhone =
-                document
-                    .getElementById('fastCustomerPhone')
-                    .value;
-
-            const deliveryAddress =
-                document
-                    .getElementById('fastDeliveryAddress')
-                    .value;
-
-            const shippingMethod =
-                shippingSelect.value;
 
             submitBtn.disabled = true;
             submitBtn.innerText = d.savingBtn;
 
-            // Данные просто сохраняем локально — на сервер (formsubmit.co)
-            // они пока НЕ уходят.
-            form.style.display = 'none';
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(() => {
 
-            document
-                .getElementById('paypal-fast-container')
-                .style.display = 'block';
+                    form.style.display = 'none';
 
-            if (
-                window.paypal &&
-                window.paypal.Buttons
-            ) {
+                    document
+                        .getElementById('paypal-fast-container')
+                        .style.display = 'block';
 
-                window.paypal.Buttons({
+                    // =====================================================
+                    // ВАЖНО:
+                    // EmailJS ЗДЕСЬ БОЛЬШЕ НЕ ВЫЗЫВАЕТСЯ.
+                    //
+                    // Письмо клиенту отправится только после успешной
+                    // оплаты PayPal — внутри onApprove ниже.
+                    // =====================================================
 
-                    style: {
-                        layout: 'vertical',
-                        color: 'gold',
-                        shape: 'rect',
-                        label: 'buynow'
-                    },
+                    if (
+                        window.paypal &&
+                        window.paypal.Buttons
+                    ) {
 
-                    createOrder:
-                        function(data, actions) {
+                        window.paypal.Buttons({
 
-                            return actions.order.create({
+                            style: {
+                                layout: 'vertical',
+                                color: 'gold',
+                                shape: 'rect',
+                                label: 'buynow'
+                            },
 
-                                purchase_units: [{
+                            createOrder:
+                                function(data, actions) {
 
-                                    invoice_id:
-                                        orderId,
+                                    return actions.order.create({
 
-                                    description:
-                                        `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color}/${fitText})`,
+                                        purchase_units: [{
 
-                                    amount: {
-                                        currency_code: "EUR",
-                                        value:
-                                            finalPrice.toFixed(2)
-                                    }
+                                            invoice_id:
+                                                orderId,
 
-                                }]
+                                            description:
+                                                `Заказ ${orderId}: ${product.name} (${selection.size}/${selection.color}/${fitText})`,
 
-                            });
+                                            amount: {
+                                                currency_code: "EUR",
+                                                value:
+                                                    finalPrice.toFixed(2)
+                                            }
 
-                        },
-
-                    // =================================================
-                    // ОПЛАТА УСПЕШНО ЗАВЕРШЕНА
-                    // =================================================
-                    onApprove:
-                        function(data, actions) {
-
-                            return actions
-                                .order
-                                .capture()
-                                .then(function(details) {
-
-                                    // =========================================
-                                    // ТОЛЬКО ТЕПЕРЬ, ПОСЛЕ ПОДТВЕРЖДЁННОЙ ОПЛАТЫ:
-                                    // 1) отправляем данные заказа на formsubmit.co
-                                    // 2) отправляем письмо клиенту через EmailJS
-                                    // =========================================
-
-                                    const orderData = new FormData();
-                                    orderData.append('_captcha', 'false');
-                                    orderData.append('order_id', orderId);
-                                    orderData.append('product', `${product.name} (${selection.size}/${selection.color}/${fitText})`);
-                                    orderData.append('total_price', `${finalPrice.toFixed(2)} €`);
-                                    orderData.append('customer_name', customerName);
-                                    orderData.append('email', customerEmail);
-                                    orderData.append('customer_phone', customerPhone);
-                                    orderData.append('shipping_method', shippingMethod);
-                                    orderData.append('delivery_address', deliveryAddress);
-                                    orderData.append('paypal_transaction_id', (details && details.id) ? details.id : '');
-                                    orderData.append('payment_status', 'PAID');
-
-                                    fetch('https://formsubmit.co/lyvero.company@gmail.com', {
-                                        method: 'POST',
-                                        body: orderData,
-                                        headers: {
-                                            'Accept': 'application/json'
-                                        }
-                                    }).catch(err => {
-                                        console.error('Ошибка отправки подтверждённого заказа:', err);
-                                    });
-
-                                    sendCustomerConfirmationEmail({
-
-                                        to_email:
-                                            customerEmail,
-
-                                        customer_name:
-                                            customerName,
-
-                                        order_id:
-                                            orderId,
-
-                                        product:
-                                            `${product.name} (${selection.size}/${selection.color}/${fitText})`,
-
-                                        total_price:
-                                            `${finalPrice.toFixed(2)} €`
+                                        }]
 
                                     });
+
+                                },
+
+                            // =================================================
+                            // ОПЛАТА УСПЕШНО ЗАВЕРШЕНА
+                            // =================================================
+                            onApprove:
+                                function(data, actions) {
+
+                                    return actions
+                                        .order
+                                        .capture()
+                                        .then(function(details) {
+
+                                            // =================================
+                                            // EMAILJS ОТПРАВЛЯЕТ ПИСЬМО
+                                            // ТОЛЬКО ПОСЛЕ УСПЕШНОЙ ОПЛАТЫ
+                                            // =================================
+
+                                            sendCustomerConfirmationEmail({
+
+                                                to_email:
+                                                    customerEmail,
+
+                                                customer_name:
+                                                    customerName,
+
+                                                order_id:
+                                                    orderId,
+
+                                                product:
+                                                    `${product.name} (${selection.size}/${selection.color}/${fitText})`,
+
+                                                total_price:
+                                                    `${finalPrice.toFixed(2)} €`
+
+                                            });
+
+                                            showMessage(
+                                                d.paymentSuccess
+                                            );
+
+                                            payModal.style.display =
+                                                'none';
+
+                                            document.body.style.overflow =
+                                                '';
+
+                                        });
+
+                                },
+
+                            onError:
+                                function(err) {
+
+                                    console.error(err);
 
                                     showMessage(
-                                        d.paymentSuccess
+                                        d.paypalErrorMsg
                                     );
 
-                                    payModal.style.display =
-                                        'none';
+                                }
 
-                                    document.body.style.overflow =
-                                        '';
+                        }).render(
+                            '#paypal-buttons-inside'
+                        );
 
-                                });
+                    }
 
-                        },
+                })
+                .catch(() => {
 
-                    onError:
-                        function(err) {
+                    alert(
+                        d.saveErrorMsg
+                    );
 
-                            console.error(err);
+                    submitBtn.disabled =
+                        false;
 
-                            showMessage(
-                                d.paypalErrorMsg
-                            );
+                    submitBtn.innerText =
+                        txtBtnSave;
 
-                        },
-
-                    onCancel:
-                        function(data) {
-
-                            // Клиент передумал/закрыл окно PayPal —
-                            // возвращаем ему форму, ничего никуда не отправляли.
-                            form.style.display = 'flex';
-
-                            document
-                                .getElementById('paypal-fast-container')
-                                .style.display = 'none';
-
-                            submitBtn.disabled = false;
-                            submitBtn.innerText = txtBtnSave;
-
-                        }
-
-                }).render(
-                    '#paypal-buttons-inside'
-                );
-
-            } else {
-
-                // =============================================================
-                // ДОБАВЛЕНО: раньше, если PayPal SDK почему-то не загружал
-                // объект window.paypal.Buttons (например, из-за неправильного
-                // параметра "components" в теге <script> подключения SDK),
-                // код просто ничего не делал — клиент видел пустой блок
-                // без кнопок оплаты и без единой ошибки на экране.
-                //
-                // Теперь в этом случае явно показываем сообщение об ошибке
-                // и возвращаем клиенту форму, чтобы он не "застревал"
-                // на пустом окне.
-                // =============================================================
-
-                console.error('window.paypal.Buttons недоступен. Проверьте параметр components в теге подключения PayPal SDK (должно быть components=buttons).');
-
-                showMessage(
-                    d.paypalErrorMsg
-                );
-
-                form.style.display = 'flex';
-
-                document
-                    .getElementById('paypal-fast-container')
-                    .style.display = 'none';
-
-                submitBtn.disabled = false;
-                submitBtn.innerText = txtBtnSave;
-
-            }
+                });
 
         });
 
