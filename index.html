@@ -14,14 +14,32 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
 
+    <!-- ИСПРАВЛЕНО (см. подробности ниже, у тега PayPal) -->
     <!-- EmailJS — отправка авто-письма с подтверждением заказа на почту клиента.
          ВАЖНО: чтобы письма реально отправлялись, нужно завершить настройку —
          см. комментарий "НАСТРОЙКА EMAILJS" в начале файла script.js -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 
     <script src="script.js" defer></script>
+
+    <!--
+        ИСПРАВЛЕНО: components=hosted-buttons -> components=buttons
+
+        Раньше SDK PayPal был подключён с параметром "hosted-buttons".
+        Этот параметр загружает объект window.paypal.HostedButtons,
+        а НЕ window.paypal.Buttons.
+
+        Но весь код в script.js (функция buyNow -> onApprove -> capture)
+        написан под обычные Smart Payment Buttons, т.е. вызывает именно
+        window.paypal.Buttons({...}).render(...).
+
+        Из-за несовпадения параметра window.paypal.Buttons был undefined,
+        проверка "if (window.paypal && window.paypal.Buttons)" была false,
+        и кнопки оплаты просто не появлялись после подтверждения данных
+        (без видимой ошибки на экране).
+    -->
     <script 
-  src="https://www.paypal.com/sdk/js?client-id=BAAH8ybtCwe21tReG_5uRuwmmimUHMj6W51hartY8vOJ2VDYnK4OEbnyHGnDBg9BHh5GNT_FFHmfqXlBnE&components=hosted-buttons&disable-funding=venmo&currency=EUR">
+  src="https://www.paypal.com/sdk/js?client-id=BAAH8ybtCwe21tReG_5uRuwmmimUHMj6W51hartY8vOJ2VDYnK4OEbnyHGnDBg9BHh5GNT_FFHmfqXlBnE&components=buttons&disable-funding=venmo&currency=EUR">
 </script>
 
     <style>
