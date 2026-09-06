@@ -136,15 +136,263 @@
 
         <div class="products-grid">
 
+            <!-- ========================================================== -->
+            <!-- НОВАЯ КАРТОЧКА 1 — ЗАГОТОВКА, ЗАПОЛНИТЬ ПЕРЕД ПУБЛИКАЦИЕЙ -->
+            <!-- TODO: -->
+            <!--  1) заменить data-product-id="new-product-1" на реальный id -->
+            <!--     (и точно такой же id указать в script.js в массивах -->
+            <!--     products / catalogSelection / productNames) -->
+            <!--  2) заменить пути к картинкам в src / data-black / data-white -->
+            <!--  3) КАРУСЕЛЬ: в data-images-black и data-images-white перечислить -->
+            <!--     через запятую все фото этого цвета с разных ракурсов, -->
+            <!--     например: "images/foo-black-1.png, images/foo-black-2.png" -->
+            <!--     Если фото одно — просто оставить один путь, стрелки скроются сами. -->
+            <!--  4) заменить название товара в <h3> -->
+            <!--  5) поправить цену, если не 15 € -->
+            <!--  6) в <option> цвета оставить только те, для которых есть фото -->
+            <!--  7) если для этого товара будет PayPal, добавить data-paypal-black="" -->
+            <!--     и/или data-paypal-white="" на кнопку, как у "Never Give Up" -->
+            <!-- ========================================================== -->
+            <div class="product-card reveal" data-product-id="signal-lost">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/signal-front.jpg"
+                        alt="Signal Lost"
+                        class="product-image"
+                        data-black="images/signal-front.jpg"
+                        data-white="images/TODO-new-3-white.png"
+                        data-images-black="images/signal-front.jpg, images/signal-back.jpg, images/signalL-front.jpg, images/signalL-back.jpg"
+                        data-images-white="">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
+                </div>
+
+                <div class="product-body">
+                    <h3 class="lang-p-title">Signal Lost</h3>
+                    <p class="product-price">1 €</p>
+
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="black" class="lang-color-black">Черный</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                                <option>L</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            
+
+            <div class="product-card reveal" data-product-id="no-kings">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/No Kings.png"
+                        alt="No Kings"
+                        class="product-image"
+                        data-black=""
+                        data-white="images/No Kings.png"
+                        data-images-black=""
+                        data-images-white="images/No Kings.png, images/No Kings-back.png, images/NoKings-front.png, images/NoKings-back.png">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
+                </div>
+
+                <div class="product-body">
+                    <h3 class="lang-p-title">No Kings</h3>
+                    <p class="product-price">18 €</p>
+
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="white" class="lang-color-white">Белый</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="product-card reveal" data-product-id="connection">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/ConnectionB.jpg"
+                        alt="TODO Название товара 1"
+                        class="product-image"
+                        data-black="images/ConnectionB.jpg"
+                        data-white="images/ConnectionW.jpg"
+                        data-images-black="images/ConnectionB.jpg, images/Connection-frontB.png"
+                        data-images-white="images/ConnectionW.jpg, images/Connection-frontW.png">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
+                </div>
+
+                <div class="product-body">
+                    <h3 class="lang-p-title">Connection</h3>
+                    <p class="product-price">16 €</p>
+
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="black" class="lang-color-black">Черный</option>
+                                <option value="white" class="lang-color-white">Белый</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                                <option>L</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================================== -->
+            <!-- НОВАЯ КАРТОЧКА 2 — ЗАГОТОВКА, ЗАПОЛНИТЬ ПЕРЕД ПУБЛИКАЦИЕЙ -->
+            <!-- TODO: те же пункты, что и в карточке 1 выше -->
+            <!-- ========================================================== -->
+            <div class="product-card reveal" data-product-id="time-to-live">
+                <div class="product-image-wrap">
+                    <img
+                        src="images/Time to liveB.png"
+                        alt="TODO Название товара 2"
+                        class="product-image"
+                        data-black="images/time-to-liveB.png"
+                        data-white="images/Time-to-liveW.png"
+                        data-images-black="images/Time to liveB.png, images/Time to live-frontB.png"
+                        data-images-white="images/Time to liveW.png, images/Time to live-frontW.png">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
+                </div>
+
+                <div class="product-body">
+                    <h3 class="lang-p-title">Time to live</h3>
+                    <p class="product-price">16 €</p>
+
+                    <div class="options">
+                        <div class="option-row">
+                            <label class="lang-label-color">Цвет</label>
+                            <select class="color-select">
+                                <option value="black" class="lang-color-black">Черный</option>
+                                <option value="white" class="lang-color-white">Белый</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-size">Размер</label>
+                            <select>
+                                <option>S</option>
+                                <option>M</option>
+                                <option>L</option>
+                            </select>
+                        </div>
+                        <div class="option-row">
+                            <label class="lang-label-fit">Посадка</label>
+                            <select class="fit-select">
+                                <option value="slim" class="lang-fit-slim">Slim fit</option>
+                                <option value="regular" class="lang-fit-regular">Regular</option>
+                                <option value="relaxed" class="lang-fit-relaxed">Relaxed</option>
+                                <option value="loose" class="lang-fit-loose">Loose</option>
+                                <option value="oversize" class="lang-fit-oversize">Oversize</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="product-buttons">
+                        <button
+                            class="buy-btn lang-btn-buy">
+                            Купить сейчас
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="product-card reveal" data-product-id="never">
                 <div class="product-image-wrap">
                     <img
                         src="images/Never Give Up.png"
                         alt="Never Give Up"
                         class="product-image"
-                        data-black="images/never.png"
                         data-black="images/Never Give Up.png"
-                        data-white="">
+                        data-white=""
+                        data-images-black="images/Never Give Up.png, images/never.png"
+                        data-images-white="">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
                 </div>
 
                 <div class="product-body">
@@ -194,7 +442,12 @@
                         alt="Chaos"
                         class="product-image"
                         data-black=""
-                        data-white="images/Chaos (2).png">
+                        data-white="images/Chaos (2).png,"
+                        data-images-black=""
+                        data-images-white="images/Chaos (2).png, images/chaos-back.png">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
                 </div>
 
                 <div class="product-body">
@@ -244,7 +497,12 @@
                         alt="Summer Vibes"
                         class="product-image"
                         data-black="images/Summer Vibes Black.png"
-                        data-white="images/Summer Vibes White.png">
+                        data-white="images/Summer Vibes White.png"
+                        data-images-black="images/Summer Vibes Black.png, images/summer-fitB.png"
+                        data-images-white="images/Summer Vibes White.png, images/summer-fitW.png">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
                 </div>
 
                 <div class="product-body">
@@ -294,7 +552,12 @@
                         alt="Tokyo Drive"
                         class="product-image"
                         data-black="images/Tokyo Drive Black.png"
-                        data-white="images/Tokyo Drive White.png">
+                        data-white="images/Tokyo Drive White.png"
+                        data-images-black="images/Tokyo Drive Black.png, images/tokyoB-front.png"
+                        data-images-white="images/Tokyo Drive White.png, images/tokyoW-front.png">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
                 </div>
 
                 <div class="product-body">
@@ -344,7 +607,12 @@
                         alt="Shadow Ronin"
                         class="product-image"
                         data-black="images/Shadow ronin Black.png"
-                        data-white="">
+                        data-white=""
+                        data-images-black="images/Shadow ronin Black.png, images/Shadow ronin- front.png"
+                        data-images-white="">
+                    <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
+                    <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
+                    <div class="carousel-dots"></div>
                 </div>
 
                 <div class="product-body">
@@ -430,4 +698,4 @@
         </div>
     </footer>
 
-</body>
+</body></html>

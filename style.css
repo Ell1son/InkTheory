@@ -704,6 +704,79 @@ a {
     z-index: 2;
 }
 
+/* =========================================================================
+   ПРОСТАЯ КАРУСЕЛЬ ФОТО ТОВАРА (разные ракурсы)
+   ========================================================================= */
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(201, 162, 75, 0.35);
+    background: rgba(11, 10, 13, 0.55);
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s var(--ease), background 0.2s;
+}
+
+.product-image-wrap:hover .carousel-btn {
+    opacity: 1;
+}
+
+.carousel-btn:hover {
+    background: rgba(201, 162, 75, 0.35);
+}
+
+.carousel-prev {
+    left: 10px;
+}
+
+.carousel-next {
+    right: 10px;
+}
+
+.carousel-dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 10px;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.carousel-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(242, 237, 226, 0.4);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.carousel-dot.active {
+    background: var(--gold);
+    transform: scale(1.35);
+}
+
+/* на тач-устройствах ховера нет — стрелки показываем всегда */
+@media (max-width: 768px), (hover: none) {
+    .carousel-btn {
+        opacity: 1;
+    }
+}
+
 .product-body {
     padding: 22px 24px 26px;
 }

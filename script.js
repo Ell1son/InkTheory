@@ -56,17 +56,32 @@ const carrierLocatorLinks = {
 
 // =========================================================================
 // ДАННЫЕ О ТОВАРАХ И ИХ ТЕКУЩЕМ ВЫБОРЕ ДЛЯ МОДАЛКИ PAYPAL
+//
+// TODO ДЛЯ НОВЫХ ТОВАРОВ "new-product-1" / "new-product-2":
+//  1) поменять id на реальный (и точно так же — в index.html
+//     в data-product-id, и в объекте productNames ниже)
+//  2) вписать реальное name / price
+//  3) вписать реальные пути к картинкам вместо TODO-...
 // =========================================================================
 
 const products = [
+    { id: 'signal-lost', name: 'Signal Lost', price: 1.00, colors: { black: 'images/signal-front.jpg', white: 'images/TODO-new-3-white.png' } },
+    { id: 'no-kings', name: 'No Kings', price: 18.00, colors: { black: 'images/No Kings.jpg', white: 'images/No Kings.png' } },
+    { id: 'connection', name: 'Connection', price: 16.00, colors: { black: 'images/ConnectionB.jpg', white: 'images/ConnectionW.jpg' } },
+    { id: 'time-to-live', name: 'Time ti live', price: 16.00, colors: { black: 'images/Time to liveB.png', white: 'images/Time to liveW.png' } },
     { id: 'never', name: 'Never Give Up', price: 15.00, colors: { black: 'images/Never Give Up.png', white: 'images/Never Give Up.png' } },
     { id: 'chaos', name: 'Chaos', price: 15.00, colors: { black: 'images/Chaos (2).png', white: 'images/Chaos (2).png' } },
     { id: 'summer', name: 'Summer Vibes', price: 15.00, colors: { black: 'images/Summer Vibes Black.png', white: 'images/Summer Vibes White.png' } },
     { id: 'drive', name: 'Tokyo Drive', price: 15.00, colors: { black: 'images/Tokyo Drive Black.png', white: 'images/Tokyo Drive White.png' } },
     { id: 'samurai', name: 'Shadow Ronin', price: 15.00, colors: { black: 'images/Shadow ronin Black.png', white: 'images/Shadow ronin Black.png' } }
+    
 ];
 
 const catalogSelection = {
+    'signal-lost': { color: 'black', size: 'S', fit: 'regular' },
+    'no-kings': { color: 'black', size: 'S', fit: 'regular' },
+    'connection': { color: 'black', size: 'S', fit: 'regular' },
+    'time-to-live': { color: 'black', size: 'S', fit: 'regular' },
     never: { color: 'black', size: 'S', fit: 'regular' },
     chaos: { color: 'white', size: 'S', fit: 'regular' },
     summer: { color: 'black', size: 'S', fit: 'regular' },
@@ -1601,6 +1616,110 @@ function showMessage(text) {
 }
 
 // =========================================================================
+// ПРОСТАЯ КАРУСЕЛЬ ФОТО ТОВАРА (разные ракурсы одного цвета)
+// -------------------------------------------------------------------------
+// Источник фото для карусели — атрибуты data-images-black / data-images-white
+// на <img class="product-image">, список путей через запятую.
+// Если список не задан, карусель падает обратно на одиночное фото из
+// data-black / data-white (как раньше) — так старые карточки не ломаются.
+// =========================================================================
+
+function capitalize(str) {
+    return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+}
+
+function getCardCurrentColor(card) {
+    const colorSelect = card ? card.querySelector('.color-select') : null;
+    return colorSelect ? colorSelect.value : 'black';
+}
+
+function getImageListForColor(image, color) {
+    const listAttr = image.dataset['images' + capitalize(color)];
+
+    if (listAttr && listAttr.trim()) {
+        return listAttr.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
+    const single = image.dataset[color];
+    return single ? [single] : [];
+}
+
+function initCardCarousel(wrap) {
+    const image = wrap.querySelector('.product-image');
+    const prevBtn = wrap.querySelector('.carousel-prev');
+    const nextBtn = wrap.querySelector('.carousel-next');
+    const dotsBox = wrap.querySelector('.carousel-dots');
+    const card = wrap.closest('.product-card');
+
+    if (!image) return;
+
+    let index = 0;
+
+    function render() {
+        const color = getCardCurrentColor(card);
+        let images = getImageListForColor(image, color);
+
+        if (images.length === 0) {
+            images = [image.getAttribute('src')];
+        }
+
+        if (index >= images.length) index = 0;
+        if (index < 0) index = images.length - 1;
+
+        image.src = images[index];
+
+        const showControls = images.length > 1;
+
+        if (prevBtn) prevBtn.style.display = showControls ? '' : 'none';
+        if (nextBtn) nextBtn.style.display = showControls ? '' : 'none';
+
+        if (dotsBox) {
+            dotsBox.innerHTML = '';
+
+            if (showControls) {
+                images.forEach((_, i) => {
+                    const dot = document.createElement('span');
+                    dot.className = 'carousel-dot' + (i === index ? ' active' : '');
+                    dot.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        index = i;
+                        render();
+                    });
+                    dotsBox.appendChild(dot);
+                });
+            }
+        }
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            index -= 1;
+            render();
+        });
+    }
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            index += 1;
+            render();
+        });
+    }
+
+    // сохраняем ссылку на "сброс" карусели, чтобы вызвать её
+    // при смене цвета товара (см. обработчик color-select ниже)
+    wrap.__resetCarousel = () => {
+        index = 0;
+        render();
+    };
+
+    render();
+}
+
+document.querySelectorAll('.product-image-wrap').forEach(initCardCarousel);
+
+// =========================================================================
 // СМЕНА ЦВЕТА ТОВАРА
 // =========================================================================
 
@@ -1625,16 +1744,30 @@ colorSelects.forEach(select => {
                     ".product-image"
                 );
 
+            const wrap =
+                card.querySelector(
+                    ".product-image-wrap"
+                );
+
             const color =
                 select.value;
 
-            const newImage =
-                image.dataset[color];
+            const hasImages =
+                (image.dataset[color] && image.dataset[color].trim()) ||
+                (image.dataset['images' + capitalize(color)] && image.dataset['images' + capitalize(color)].trim());
 
-            if (newImage) {
+            if (hasImages) {
 
-                image.src =
-                    newImage;
+                if (wrap && wrap.__resetCarousel) {
+
+                    wrap.__resetCarousel();
+
+                } else {
+
+                    image.src =
+                        image.dataset[color];
+
+                }
 
             } else {
 
@@ -1863,9 +1996,36 @@ if (searchInput) {
 
 // =========================================================================
 // СЛОВАРЬ НАЗВАНИЙ
+//
+// TODO: переименовать new-product-1 / new-product-2 (ключи объекта)
+// в реальные id товаров и вписать настоящие названия на трёх языках.
 // =========================================================================
 
 const productNames = {
+
+    'connection': {
+        ru: "Connection",
+        en: "Connection",
+        et: "Connection"
+    },
+
+    'time-to-live': {
+        ru: "Time to live",
+        en: "Time to live",
+        et: "Time to live"
+    },
+
+        'no-kings': {
+        ru: "No Kings",
+        en: "No Kings",
+        et: "No Kings"
+    },
+
+    'signal-lost': {
+        ru: "Signal Lost",
+        en: "Signal Lost",
+        et: "Signal Lost"
+    },
 
     never: {
         ru: "Never Give Up",
