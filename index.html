@@ -126,7 +126,7 @@
     <section class="catalog" id="catalog">
 
         <div class="section-head reveal">
-            <span class="eyebrow">Коллекция</span>
+            
             <span class="eyebrow" id="collections">Коллекция</span>
             <h2 class="catalog-title" id="lang-catalog-title">Каталог</h2>
             <svg class="ink-divider" viewBox="0 0 300 16" preserveAspectRatio="none" aria-hidden="true">
@@ -136,23 +136,6 @@
 
         <div class="products-grid">
 
-            <!-- ========================================================== -->
-            <!-- НОВАЯ КАРТОЧКА 1 — ЗАГОТОВКА, ЗАПОЛНИТЬ ПЕРЕД ПУБЛИКАЦИЕЙ -->
-            <!-- TODO: -->
-            <!--  1) заменить data-product-id="new-product-1" на реальный id -->
-            <!--     (и точно такой же id указать в script.js в массивах -->
-            <!--     products / catalogSelection / productNames) -->
-            <!--  2) заменить пути к картинкам в src / data-black / data-white -->
-            <!--  3) КАРУСЕЛЬ: в data-images-black и data-images-white перечислить -->
-            <!--     через запятую все фото этого цвета с разных ракурсов, -->
-            <!--     например: "images/foo-black-1.png, images/foo-black-2.png" -->
-            <!--     Если фото одно — просто оставить один путь, стрелки скроются сами. -->
-            <!--  4) заменить название товара в <h3> -->
-            <!--  5) поправить цену, если не 15 € -->
-            <!--  6) в <option> цвета оставить только те, для которых есть фото -->
-            <!--  7) если для этого товара будет PayPal, добавить data-paypal-black="" -->
-            <!--     и/или data-paypal-white="" на кнопку, как у "Never Give Up" -->
-            <!-- ========================================================== -->
             <div class="product-card reveal" data-product-id="signal-lost">
                 <div class="product-image-wrap">
                     <img
@@ -171,7 +154,7 @@
                 <div class="product-body">
                     <h3 class="lang-p-title">Signal Lost</h3>
                     <p class="product-price">18 €</p>
-
+ 
                     <div class="options">
                         <div class="option-row">
                             <label class="lang-label-color">Цвет</label>
@@ -332,8 +315,8 @@
                         class="product-image"
                         data-black="images/time-to-liveB.png"
                         data-white="images/Time-to-liveW.png"
-                        data-images-black="images/Time to liveB.png, images/Time to live-frontB.png"
-                        data-images-white="images/Time to liveW.png, images/Time to live-frontW.png">
+                        data-images-black="img/liveB.jpg, img/liveBF.jpg"
+                        data-images-white="img/liveW.jpg, img/liveWF.jpg">
                     <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
                     <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
                     <div class="carousel-dots"></div>
@@ -388,7 +371,7 @@
                         class="product-image"
                         data-black="images/Never Give Up.png"
                         data-white=""
-                        data-images-black="images/Never Give Up.png, images/never.png"
+                        data-images-black="images/Never Give Up.png, img/neverF.jpg"
                         data-images-white="">
                     <button type="button" class="carousel-btn carousel-prev" aria-label="Предыдущее фото">‹</button>
                     <button type="button" class="carousel-btn carousel-next" aria-label="Следующее фото">›</button>
