@@ -65,7 +65,7 @@ const carrierLocatorLinks = {
 // =========================================================================
 
 const products = [
-    { id: 'signal-lost', name: 'Signal Lost', price: 1.00, colors: { black: 'images/signal-front.jpg', white: 'images/TODO-new-3-white.png' } },
+    { id: 'signal-lost', name: 'Signal Lost', price: 18.00, colors: { black: 'images/signal-front.jpg', white: 'images/TODO-new-3-white.png' } },
     { id: 'no-kings', name: 'No Kings', price: 18.00, colors: { black: 'images/No Kings.jpg', white: 'images/No Kings.png' } },
     { id: 'connection', name: 'Connection', price: 16.00, colors: { black: 'images/ConnectionB.jpg', white: 'images/ConnectionW.jpg' } },
     { id: 'time-to-live', name: 'Time ti live', price: 16.00, colors: { black: 'images/Time to liveB.png', white: 'images/Time to liveW.png' } },
